@@ -1,0 +1,336 @@
+{
+  "birthData": {
+    "name": "carlos",
+    "date": "1983-01-01",
+    "time": "15:30",
+    "place": "palma, españa"
+  },
+  "planets": [
+    {
+      "name": "Venus",
+      "sign": "Capricornio",
+      "degree": 24.8,
+      "house": 8
+    },
+    {
+      "name": "Sun",
+      "sign": "Capricornio",
+      "degree": 10.6,
+      "house": 8
+    },
+    {
+      "name": "Moon",
+      "sign": "Leo",
+      "degree": 10.7,
+      "house": 3
+    },
+    {
+      "name": "Mercury",
+      "sign": "Acuario",
+      "degree": 0,
+      "house": 9
+    },
+    {
+      "name": "Mars",
+      "sign": "Acuario",
+      "degree": 17.5,
+      "house": 9
+    },
+    {
+      "name": "Jupiter",
+      "sign": "Sagitario",
+      "degree": 1.3,
+      "house": 6
+    },
+    {
+      "name": "Saturn",
+      "sign": "Escorpio",
+      "degree": 2.9,
+      "house": 6
+    },
+    {
+      "name": "Uranus",
+      "sign": "Sagitario",
+      "degree": 7,
+      "house": 6
+    },
+    {
+      "name": "Neptune",
+      "sign": "Sagitario",
+      "degree": 27.3,
+      "house": 7
+    },
+    {
+      "name": "Pluto",
+      "sign": "Libra",
+      "degree": 29.2,
+      "house": 6
+    },
+    {
+      "name": "Chiron",
+      "sign": "Tauro",
+      "degree": 23.7,
+      "house": 12
+    },
+    {
+      "name": "Sirius",
+      "sign": "Aries",
+      "degree": 1.8,
+      "house": 11
+    }
+  ],
+  "ascendant": "Géminis",
+  "midheaven": "Acuario",
+  "aspects": [
+    {
+      "point1": "Sun",
+      "point2": "South Node",
+      "type": "Conjunction",
+      "orb": 6.7766
+    },
+    {
+      "point1": "Sun",
+      "point2": "North Node",
+      "type": "Opposition",
+      "orb": 6.7766
+    },
+    {
+      "point1": "Moon",
+      "point2": "Mars",
+      "type": "Opposition",
+      "orb": 6.8219
+    },
+    {
+      "point1": "Moon",
+      "point2": "Midheaven",
+      "type": "Opposition",
+      "orb": 7.7138
+    },
+    {
+      "point1": "Moon",
+      "point2": "Uranus",
+      "type": "Trine",
+      "orb": 3.6879
+    },
+    {
+      "point1": "Moon",
+      "point2": "Ascendant",
+      "type": "Sextile",
+      "orb": 1.389
+    },
+    {
+      "point1": "Mercury",
+      "point2": "Venus",
+      "type": "Conjunction",
+      "orb": 5.2316
+    },
+    {
+      "point1": "Mercury",
+      "point2": "Chiron",
+      "type": "Trine",
+      "orb": 6.3346
+    },
+    {
+      "point1": "Mercury",
+      "point2": "Saturn",
+      "type": "Square",
+      "orb": 2.9096
+    },
+    {
+      "point1": "Mercury",
+      "point2": "Pluto",
+      "type": "Square",
+      "orb": 0.7869
+    },
+    {
+      "point1": "Mercury",
+      "point2": "Jupiter",
+      "type": "Sextile",
+      "orb": 1.2592
+    },
+    {
+      "point1": "Mercury",
+      "point2": "Sirius",
+      "type": "Sextile",
+      "orb": 1.7306
+    },
+    {
+      "point1": "Venus",
+      "point2": "Lilith",
+      "type": "Conjunction",
+      "orb": 3.1423
+    },
+    {
+      "point1": "Venus",
+      "point2": "Chiron",
+      "type": "Trine",
+      "orb": 1.103
+    },
+    {
+      "point1": "Venus",
+      "point2": "Pluto",
+      "type": "Square",
+      "orb": 4.4447
+    },
+    {
+      "point1": "Mars",
+      "point2": "Midheaven",
+      "type": "Conjunction",
+      "orb": 0.8919
+    },
+    {
+      "point1": "Mars",
+      "point2": "Ascendant",
+      "type": "Trine",
+      "orb": 5.4329
+    },
+    {
+      "point1": "Mars",
+      "point2": "Chiron",
+      "type": "Square",
+      "orb": 6.2244
+    },
+    {
+      "point1": "Jupiter",
+      "point2": "Uranus",
+      "type": "Conjunction",
+      "orb": 5.672
+    },
+    {
+      "point1": "Jupiter",
+      "point2": "Chiron",
+      "type": "Opposition",
+      "orb": 7.5938
+    },
+    {
+      "point1": "Jupiter",
+      "point2": "Sirius",
+      "type": "Trine",
+      "orb": 0.4714
+    },
+    {
+      "point1": "Saturn",
+      "point2": "Pluto",
+      "type": "Conjunction",
+      "orb": 3.6965
+    },
+    {
+      "point1": "Saturn",
+      "point2": "North Node",
+      "type": "Trine",
+      "orb": 0.8854
+    },
+    {
+      "point1": "Saturn",
+      "point2": "Neptune",
+      "type": "Sextile",
+      "orb": 5.6747
+    },
+    {
+      "point1": "Saturn",
+      "point2": "South Node",
+      "type": "Sextile",
+      "orb": 0.8854
+    },
+    {
+      "point1": "Uranus",
+      "point2": "Ascendant",
+      "type": "Opposition",
+      "orb": 5.0769
+    },
+    {
+      "point1": "Uranus",
+      "point2": "Sirius",
+      "type": "Trine",
+      "orb": 5.2006
+    },
+    {
+      "point1": "Neptune",
+      "point2": "South Node",
+      "type": "Conjunction",
+      "orb": 6.5601
+    },
+    {
+      "point1": "Neptune",
+      "point2": "North Node",
+      "type": "Opposition",
+      "orb": 6.5601
+    },
+    {
+      "point1": "Neptune",
+      "point2": "Sirius",
+      "type": "Square",
+      "orb": 4.4957
+    },
+    {
+      "point1": "Neptune",
+      "point2": "Pluto",
+      "type": "Sextile",
+      "orb": 1.9782
+    },
+    {
+      "point1": "Pluto",
+      "point2": "North Node",
+      "type": "Trine",
+      "orb": 4.5819
+    },
+    {
+      "point1": "Pluto",
+      "point2": "South Node",
+      "type": "Sextile",
+      "orb": 4.5819
+    },
+    {
+      "point1": "Chiron",
+      "point2": "Lilith",
+      "type": "Trine",
+      "orb": 2.0393
+    },
+    {
+      "point1": "Chiron",
+      "point2": "Midheaven",
+      "type": "Square",
+      "orb": 5.3325
+    },
+    {
+      "point1": "Sirius",
+      "point2": "North Node",
+      "type": "Square",
+      "orb": 2.0644
+    },
+    {
+      "point1": "Sirius",
+      "point2": "South Node",
+      "type": "Square",
+      "orb": 2.0644
+    }
+  ],
+  "createdAt": "2025-12-14T22:41:18.714Z",
+  "debug": {
+    "origin": {
+      "year": 1983,
+      "month": 0,
+      "date": 1,
+      "hour": 15,
+      "minute": 30,
+      "latitude": 39.571396,
+      "longitude": 2.622432,
+      "timezone": "Europe/Madrid",
+      "localTime": "1983-01-01T15:30:00+01:00",
+      "utcTime": "1983-01-01T14:30:00Z",
+      "localSiderealTime": 320.8012358304113,
+      "julianDate": 2445336.1041666665
+    },
+    "ascendant": {
+      "eclipticDegrees": 72.0421,
+      "horizonDegrees": 0,
+      "sign": "gemini",
+      "signLabel": "Gemini"
+    },
+    "midheaven": {
+      "eclipticDegrees": 318.3669,
+      "sign": "aquarius",
+      "signLabel": "Aquarius"
+    }
+  }
+}
