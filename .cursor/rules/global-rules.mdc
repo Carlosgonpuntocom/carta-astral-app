@@ -1,0 +1,18 @@
+---
+description: Reglas globales del ecosistema
+alwaysApply: true
+---
+
+Estas reglas complementan las globales en:
+`D:\services\docs\REGLAS_DESARROLLO.md`
+Leer ambas antes de desarrollar.
+
+## Reglas mínimas activas
+
+- Responder siempre en español
+- 0 failed, 0 skipped, 0 warnings en tests
+- Nunca --no-verify en commits
+- Un commit = una cosa
+- Sin fallbacks silenciosos
+- Preguntar antes de asumir
+- No romper lo existente
