@@ -84,3 +84,7 @@ logs/
 *.sqlite
 *.sqlite3
 *.db
+
+# Cursor (efímeros / sincronizados)
+.cursor/plans/
+.cursor/rules/global-rules.mdc

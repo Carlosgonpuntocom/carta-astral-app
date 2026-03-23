@@ -1,7 +1,397 @@
----
+﻿---
 description: Reglas globales del ecosistema
 alwaysApply: true
 ---
+# Reglas de desarrollo
 
-Reglas globales en Cursor Settings (User Rules).
-Reglas completas en: D:\services\docs\REGLAS_DESARROLLO.md
+Aplican a **todos** los proyectos del ecosistema (`D:\services\`, `D:\projects\`, `D:\Roberta\`).
+
+---
+
+## Leyenda de criticidad
+
+| Nivel | Significado | Criterio para eliminar |
+|-------|------------|----------------------|
+| ⭐⭐⭐ | **Crítica** — si se incumple, el proyecto se rompe o pierde datos | Nunca eliminar |
+| ⭐⭐ | **Importante** — mejora calidad y evita bugs frecuentes | Solo si hay alternativa mejor |
+| ⭐ | **Útil** — buena práctica pero el mundo no se acaba si falta | Candidata a eliminar si hay que reducir |
+
+> Las reglas con origen en bugs reales detectados en el ecosistema son automáticamente ⭐⭐⭐.
+> Las que afectan seguridad o pérdida de datos son ⭐⭐⭐.
+
+**Resumen: 20 ⭐⭐⭐ (30%) · 29 ⭐⭐ (43%) · 18 ⭐ (27%) · 12 con 🐛 origen documentado**
+
+---
+
+## Índice de reglas por sector
+
+> **Total: 67 reglas** en 6 sectores + comunicación de resultados (12 marcadas con 🐛 — nacidas de bugs reales). Última actualización: 2026-03-23.
+> Tras 11 fusiones de reglas duplicadas/solapadas, se eliminaron 16 bullets sin perder conceptos.
+>
+> **Alcance:** Las reglas de Python, TypeScript, API REST y UX aplican solo a proyectos con ese stack. Los servicios backend puros sin UI omiten las reglas de UX. El resto son globales sin excepción.
+
+### 1. Calidad y testing (15 reglas)
+
+Asegurar que todo funciona y sigue funcionando.
+
+| Sección | Reglas | Qué cubre |
+|---------|--------|-----------|
+| Tests | 6 | 0 failed obligatorio, tests reales, validación real (incl. hardware), arranque limpio |
+| No romper lo existente | 6 | Tests antes de cerrar, no degradar, breaking changes, imports, .env.example |
+| Fases y aprobación | 3 | Aprobación explícita, release tags, documentación de fases |
+
+### 2. Código y convenciones (22 reglas)
+
+Cómo se escribe el código en todo el ecosistema.
+
+| Sección | Reglas | Qué cubre |
+|---------|--------|-----------|
+| Calidad del código | 3 | Producto profesional, alinear hacia arriba, IA no genera lógica/mensajes |
+| Nombres | 3 | snake_case, camelCase, negocio en español |
+| Comentarios y docs | 4 | Documentar el "por qué", docstrings, nombres claros |
+| Python | 4 | Type hints, Pydantic, logging, imports PEP 8 |
+| TypeScript | 4 | strict mode, interfaces, props tipadas, no any |
+| API REST | 4 | Formato respuesta, endpoints, paginación, códigos HTTP y mensajes error |
+
+### 3. Backend, errores y servicios (10 reglas)
+
+Cómo se construyen y comunican los servicios.
+
+| Sección | Reglas | Qué cubre |
+|---------|--------|-----------|
+| Errores | 7 | Sin fallbacks silenciosos, contexto, timeouts, env vars fail-fast, logging levels, idempotencia |
+| Arquitectura | 3 | Compartido vs específico, datos en BD |
+
+### 4. Seguridad (3 reglas)
+
+Proteger datos y secretos.
+
+| Sección | Reglas | Qué cubre |
+|---------|--------|-----------|
+| Seguridad en código | 3 | No hardcodear datos reales, no loguear sensibles, no subir .env |
+
+### 5. Frontend y UX (6 reglas)
+
+Experiencia de usuario y diseño de interfaces.
+
+| Sección | Reglas | Qué cubre |
+|---------|--------|-----------|
+| UX — Diseño de interfaces | 6 | Seleccionable (no texto), TDAH-friendly, listas sobre párrafos, accesibilidad, estados carga/error, responsive |
+
+### 6. Proceso de trabajo (10 reglas)
+
+Cómo se trabaja con los agentes y el repositorio.
+
+| Sección | Reglas | Qué cubre |
+|---------|--------|-----------|
+| Commits y git | 4 | No --no-verify, un commit = una cosa, formato, ramas |
+| Validar antes de implementar | 2 | Checklist pre-implementación (5 puntos), cuándo omitir |
+| Comunicación IA-usuario | 2 | Adaptar al nivel del usuario, preguntar preferencias |
+| Pendientes explícitos | 1 | No cerrar con cabos sueltos sin listarlos |
+| Reglas nacidas de bugs reales | 1 | Bug recurrente → regla nueva con 🐛, protegida contra eliminación |
+
+### Además
+
+| Sección | Qué contiene |
+|---------|-------------|
+| Stack estándar | Tecnologías frontend y backend para proyectos nuevos |
+| Estructura mínima de servicio | Template de archivos + checklist de cierre (6 items) |
+| Comunicación de resultados | Formato estándar y extendido de resumen (1 regla) |
+| Sincronización | Script `sync-global-rules.ps1` para propagar cambios |
+| Planificación | Ubicación de planes, formato obligatorio, cabecera de estado, regla de 30 días |
+
+---
+
+## Reglas globales
+
+### Tests
+
+- ⭐⭐⭐ **0 failed, 0 skipped, 0 warnings.** Siempre. Sin excepciones. Si un test no aplica temporalmente, se elimina o se marca con motivo explícito en un issue — nunca `skip` silencioso.
+- ⭐⭐⭐ **Si un test falla, se arregla el código, nunca el test.** Solo se modifica el test si está equivocado respecto a la especificación o al comportamiento acordado — en ese caso se documenta el motivo.
+- ⭐⭐⭐ **Los tests deben comprobar comportamiento real.** No usar mocks que hagan pasar el test sin verificar la lógica que importa (p. ej. no mockear la BD en un test que debe validar "registro guarda en BD"). _(🐛 origen: mocks vacíos en QA de trading que fingían pasar)_
+- ⭐⭐ **Tests en el mismo turno que el cambio.** No esperar a que los pidan. Si tocaste flujo, API o lógica crítica → añade o actualiza tests en ese mismo commit/turno.
+- ⭐⭐⭐ **No dar por cerrado sin validación real.** Se demuestra que funciona, no se asume. El agente debe probar el flujo completo siempre que pueda (curl, scripts, endpoints). Servicios con hardware real (micrófono, audio, GPU, cámara) requieren prueba manual — los mocks no sustituyen una prueba real. Si no puede probar por limitaciones del entorno, debe pedírselo al usuario explícitamente antes de dar la tarea por terminada. _(🐛 origen: STT/TTS pasaban mocks pero fallaban con GPU real en voice-service)_
+- ⭐⭐⭐ **Verificar que el servicio arranca desde cero después del cambio.** No basta con que funcione en la sesión de desarrollo. Parar el servicio, volver a arrancarlo con `start.bat` y comprobar que todo sigue funcionando. Muchos bugs se esconden en estado que sobrevive en memoria durante el desarrollo. _(🐛 origen: agentes daban OK con estado sucio de sesión anterior)_
+
+### Commits
+
+- ⭐⭐ **Nunca `--no-verify`** en commits. Los hooks existen por algo.
+- ⭐ **Un commit = una cosa.** Un fix, un feature, un refactor. Si necesitas "y" para describir el commit, son dos commits.
+- ⭐ Mensaje en formato: `tipo: descripción breve` (`feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `test:`).
+- ⭐⭐ **Convención de ramas:** `main` es la rama estable. Desarrollo en ramas `tipo/descripcion-corta` (ej. `feat/auth-jwt`, `fix/encoding-windows`, `refactor/voice-service`). No se pushea directo a `main` — siempre rama → merge. Tags de release en `main` (ej. `v0.1.0-fase1`).
+
+### Errores
+
+- ⭐⭐⭐ **Sin fallbacks silenciosos.** Si algo falla, el error debe ser visible: log, excepción, respuesta HTTP con código de error. Nunca tragarse un error con `except: pass` o devolver un valor por defecto sin avisar. _(🐛 origen: except:pass en text_flow del orchestrator y en monitoreo de fiscal)_
+- ⭐⭐ **Errores con contexto en logs.** Todo error relevante se registra con información suficiente para depurar (identificador de petición, usuario si aplica, operación). Logging estructurado, no solo mensajes sueltos.
+- ⭐ **Errores en español.** Los mensajes de error orientados al usuario van en español. Logs técnicos pueden ir en inglés si el contexto lo requiere.
+- ⭐⭐⭐ **Toda llamada HTTP entre servicios debe tener timeout explícito.** No usar el timeout por defecto de requests/httpx (que puede ser infinito). Si un servicio no responde en X segundos, el error debe ser claro: "ai-service no respondió en 10s", no un hang silencioso. _(🐛 origen: llamadas TTS colgadas 60-180s, Ollama no respondió 502)_
+- ⭐⭐⭐ **Variables de entorno obligatorias deben fallar al arrancar si faltan.** Nunca `os.getenv("SECRET_KEY")` sin default seguro ni validación. Si la variable es requerida, el servicio debe lanzar un error claro al iniciar (ej. `ValueError: Falta variable de entorno SECRET_KEY`), no fallar críticamente minutos después con un `NoneType`. _(🐛 origen: NoneType por DATABASE_URL_READ_ONLY faltante en SALUD)_
+- ⭐⭐ **Niveles de logging consistentes.** `ERROR`: algo falló y requiere atención (petición fallida, servicio caído, dato corrupto). `WARNING`: algo inesperado pero el sistema se recuperó (retry exitoso, fallback usado, valor por defecto aplicado). `INFO`: eventos normales relevantes (servicio arrancado, petición procesada, migración aplicada). `DEBUG`: detalle técnico solo para desarrollo. No usar `INFO` para errores ni `ERROR` para cosas que no lo son.
+- ⭐⭐⭐ **Operaciones que el usuario puede repetir accidentalmente deben ser idempotentes.** Si la misma acción llega dos veces (doble clic, retry, red lenta), el servidor detecta el duplicado y devuelve la respuesta original sin ejecutar dos veces. Implementar con ventana temporal, idempotency key, o constraint en BD según el caso. _(🐛 origen: doble registro de Omeprazol en SALUD)_
+
+### Arquitectura
+
+- ⭐⭐ **Funcionalidad compartida → `D:\services\`.** Si dos o más proyectos necesitan lo mismo (IA, voz, OCR, perfil, Git), va a un servicio compartido.
+- ⭐⭐ **Funcionalidad específica → su proyecto.** Lógica de negocio que solo tiene sentido en un proyecto queda en ese proyecto.
+- ⭐⭐⭐ **Los datos del usuario se persisten en base de datos, no en el navegador.** No usar `localStorage`, `sessionStorage` ni cookies como almacenamiento principal de datos de negocio. El navegador es para preferencias de UI (tema, idioma, sidebar abierto/cerrado) y tokens de sesión — los datos reales van a la BD siempre. _(🐛 origen: datos de negocio en localStorage en SALUD que se perdían al limpiar caché)_
+
+### Validar antes de implementar
+
+- ⭐⭐ **Antes de implementar funcionalidad nueva o cambios grandes**, analizar el prompt con este checklist:
+  - Alcance, supuestos implícitos, dependencias con el resto del repo
+  - Ambigüedades → sugerir mejoras o alternativas de diseño
+  - Riesgos de regresión (tests afectados, rutas críticas, integraciones externas)
+  - Orden de implementación si hay varios pasos (ej. backend → contrato → frontend → tests)
+  - Dudas → preguntar antes de tocar código si la spec no es suficiente
+- ⭐ Solo se omite si el usuario dice explícitamente "implementa directamente sin validar".
+
+### Comunicación IA-usuario
+
+- ⭐ **Adaptar la comunicación al nivel del usuario.** Si no entiende algo (término técnico, opciones), reformular en lenguaje más claro. Si indica que no entiende, simplificar sin que tenga que pedirlo dos veces.
+- ⭐⭐ **Si hay varias formas de hacer algo** (UX, flujo, criterios, diseño), preguntar cuál prefiere el usuario en lugar de elegir por él. No dar por hecho preferencias no expresadas.
+
+### No romper lo existente
+
+- ⭐⭐⭐ **Antes de cerrar un cambio**, ejecutar los tests afectados. Si fallan — incluidos tests que antes pasaban — corregir o revertir antes de dar por terminado.
+- ⭐⭐⭐ **No cambiar firmas de APIs públicas** sin actualizar todas las llamadas y tests que las usen.
+- ⭐⭐⭐ **No degradar funcionalidad**: al arreglar algo, no eliminar código útil ni simplificar borrando lógica que funciona. Si "sobra" algo, verificar que no se usa antes de eliminarlo. Si arreglar implica quitar una feature, preguntar antes con el trade-off explícito: *"Para que funcione podría [X] pero se perdería [Y]. ¿Prefieres que [alternativa]?"*
+- ⭐⭐⭐ **Si se cambia el contrato de un servicio compartido, documentar el breaking change y listar consumidores afectados.** El cierre no es válido hasta que todos los consumidores estén verificados (tests de integración, prueba manual o confirmación del usuario). _(🐛 origen: cambios en contratos de servicios compartidos que rompían consumidores sin aviso)_
+- ⭐⭐⭐ **Si se añade un import nuevo, verificar que la dependencia existe.** Si es un paquete → debe estar en `requirements.txt` / `package.json` con versión. Si es un módulo local → verificar que existe y exporta lo que se espera. No cerrar con imports que "deberían estar" sin comprobarlo. _(🐛 origen: "No module named uvicorn" en SALUD, imports rotos repetidos)_
+- ⭐⭐ **Si el código lee una variable de entorno nueva, `.env.example` se actualiza en el mismo commit.** No se cierra un cambio que añade `os.getenv("NUEVA_VAR")` sin que `.env.example` la documente con valor de ejemplo y descripción. _(🐛 origen: variables nuevas sin documentar causaban fallos al arrancar en otro entorno)_
+
+### Calidad del código
+
+- ⭐⭐ **Toda aplicación se construye como producto profesional listo para abrir al público.** Desde el primer commit: diseño cuidado, UX pensada, mensajes claros, flujos completos. No se construyen prototipos "que ya se mejoran después". Si no está listo para que lo use un usuario real, no se cierra la fase.
+- ⭐⭐ **Alinear hacia arriba, nunca hacia abajo.** Si hay inconsistencia entre dos implementaciones de lo mismo (fórmulas, lógica, flujos), mejorar la peor hasta el nivel de la mejor. Nunca empobrecer la buena para "hacer coincidir". En resumen: no empeorar lo que ya está bien.
+- ⭐⭐⭐ **La lógica de negocio, confirmaciones y mensajes al usuario los construye el código, no el modelo de IA.** La IA interpreta y extrae datos — el código decide qué hacer y qué decir. Ningún mensaje visible al usuario debe ser texto generado libremente por un LLM sin control del código. _(🐛 origen: IA inventando consejos de salud no solicitados en SALUD)_
+
+### Seguridad en código
+
+- ⭐⭐⭐ **No hardcodear ningún dato real en código:** ni API keys, contraseñas, tokens, ni tampoco IDs, emails, URLs de producción o datos de usuarios. Todo en variables de entorno, configuración o BD. Un `grep` del repositorio no debe revelar datos reales de ningún tipo.
+- ⭐⭐⭐ **No loguear datos sensibles** en claro (contraseñas, tokens, datos personales completos). Si hace falta traza, loguear solo un identificador (ej. `user_id=X`), no el valor.
+- ⭐⭐⭐ **No subir `.env`** ni archivos con secretos al repositorio; mantener `.gitignore` actualizado.
+
+### Fases y aprobación
+
+- ⭐⭐ **Nunca implementar la siguiente fase sin aprobación explícita.** Al cerrar una fase se muestra el resultado completo de pytest/vitest. Solo si pasa (0 failed, 0 skipped, 0 warnings) y el usuario aprueba, se avanza.
+- ⭐ **Cada fase cerrada con release tag** (ej. `v0.1.0-fase1`) cuando esté aprobada y todos los tests pasen.
+- ⭐ Las fases se documentan en el roadmap o PENDIENTES.md de cada proyecto.
+
+---
+
+## Stack estándar
+
+### Frontend (proyectos nuevos)
+
+| Tecnología | Versión mínima | Rol |
+|------------|---------------|-----|
+| React | 19 | Librería UI |
+| TypeScript | 5.x (strict mode) | Tipado |
+| Vite | 6 | Bundler / dev server |
+| Tailwind CSS | 4 | Estilos utility-first |
+| TanStack Query | v5 | Datos, caché, invalidación |
+| TanStack Router | última estable | Routing type-safe |
+| Zustand | última estable | Estado global (solo si necesario) |
+| Vitest + Testing Library | última estable | Tests unitarios y de componente |
+
+### Backend (proyectos nuevos)
+
+| Tecnología | Rol |
+|------------|-----|
+| FastAPI | Framework HTTP |
+| Pydantic v2 | Validación de datos |
+| SQLAlchemy | ORM (si necesita BD) |
+| Alembic | Migraciones (si necesita BD) |
+| pytest | Tests |
+| uvicorn | Servidor ASGI |
+
+### Proyectos existentes
+
+No se migran retroactivamente. Cuando un proyecto existente haga un refactor importante, se actualiza al stack estándar en ese momento.
+
+> **No se usa Docker en ningún proyecto del ecosistema.** Los servicios se ejecutan directamente con `start.bat`/`start.sh`.
+
+---
+
+## Estructura mínima de todo servicio nuevo
+
+```
+nombre-servicio/
+├── README.md              Qué hace, cómo arrancarlo, variables de entorno
+├── .env.example           Todas las variables con valores de ejemplo
+├── requirements.txt       Dependencias Python con versiones
+├── start.bat              Arranque en Windows
+├── start.sh               Arranque en Linux/macOS
+├── main.py o app/main.py  Entry point FastAPI
+└── tests/
+    ├── conftest.py        Fixtures compartidas
+    └── test_*.py          Tests con pytest
+```
+
+Opcionalmente, si el servicio tiene documentación extensa, se añade en `D:\services\docs\services\nombre-servicio.md`.
+
+### Checklist antes de dar por terminado un servicio
+
+- [ ] `python -m pytest -q` → 0 failed, 0 skipped, 0 warnings
+- [ ] `/health` responde 200
+- [ ] `.env.example` tiene todas las variables documentadas
+- [ ] `start.bat` y `start.sh` arrancan el servicio sin intervención manual
+- [ ] README.md actualizado con endpoints, variables y cómo arrancar
+- [ ] Doc en `docs/services/` creada o actualizada
+
+---
+
+## Convenciones de código
+
+### Nombres
+
+- ⭐ **Python:** `snake_case` para variables y funciones, `PascalCase` para clases, `UPPER_SNAKE_CASE` para constantes.
+- ⭐ **TypeScript/JavaScript:** `camelCase` para variables y funciones, `PascalCase` para componentes, interfaces y clases.
+- ⭐⭐ **Nombres de negocio en español** (ej. `precio_cierre`, `orden_id`, `fechaNacimiento`). Solo en inglés cuando la convención del framework lo requiera (ej. `id`, `created_at`) o el dominio sea puramente técnico.
+
+### Comentarios y documentación en código
+
+- ⭐ **Documentar el "por qué", no el "qué".** Los comentarios explican razones, decisiones de diseño o restricciones que el código por sí solo no transmite. No repetir lo que el código ya dice (nada de `// Incrementar el contador` o `// Importar el módulo`).
+- ⭐ **Módulos:** docstring breve al inicio que explique qué parte del sistema cubre.
+- ⭐ **Funciones de negocio:** docstring con propósito, parámetros relevantes y qué devuelve. No documentar triviales (getters de una línea).
+- ⭐ **Nombres claros reducen la necesidad de comentarios.** Preferir nombres descriptivos a comentarios que compensen nombres crípticos.
+
+### Python
+
+- ⭐⭐ Type hints en funciones públicas
+- ⭐⭐ Pydantic para validación de request/response
+- ⭐⭐ `logging` estándar (no prints en producción)
+- ⭐ **Orden de imports (PEP 8):** 1) stdlib, 2) third-party, 3) local. Separar cada grupo con una línea en blanco.
+
+### TypeScript
+
+- ⭐⭐ `strict: true` en tsconfig
+- ⭐ Interfaces con `PascalCase`, prefijo `I` solo si hay conflicto de nombres
+- ⭐⭐ Props tipadas explícitamente
+- ⭐⭐ No `any` salvo casos justificados con comentario
+
+### Convenciones de API REST
+
+- ⭐⭐ **Formato de respuesta consistente.** Todas las APIs devuelven la misma estructura: `{ "data": ... }` para éxito, `{ "detail": "mensaje" }` para errores. No inventar formatos distintos por servicio.
+- ⭐ **Endpoints en plural y kebab-case:** `/api/usuarios`, `/api/ordenes-compra`, `/api/cartas-astral`. Nunca mezclar singular/plural ni usar camelCase en URLs.
+- ⭐⭐ **Paginación estándar cuando aplique:** parámetros `?page=1&page_size=20`, respuesta con `{ "data": [...], "total": 42, "page": 1, "page_size": 20 }`. No devolver listas sin límite.
+- ⭐⭐ **Códigos HTTP correctos:** `200` éxito, `201` creado, `400` error de validación, `404` no encontrado, `422` datos inválidos (Pydantic), `500` error interno, `503` servicio externo no disponible. No devolver `200` con un error dentro del body. Mensajes de error siempre en español y descriptivos (ej. `raise HTTPException(status_code=404, detail="Perfil no encontrado")`).
+
+---
+
+## Reglas de comunicación IA
+
+### Resumen al terminar cada tarea
+
+⭐ Al terminar CUALQUIER tarea, siempre incluir al final de la respuesta:
+
+**Formato estándar** (tareas normales):
+
+```
+✅ PARA QUÉ SERVÍA ESTO: [una frase] | POR QUÉ: [una frase]
+```
+
+**Formato extendido** (tareas que tocan 3+ archivos, tienen breaking changes, o dejan algo pendiente):
+
+```
+✅ PARA QUÉ SERVÍA ESTO: [una frase] | POR QUÉ: [una frase]
+
+Cambios: lista breve de archivos tocados y qué cambió en cada uno
+Breaking changes: qué se rompe y qué consumidores afecta (si no hay, omitir)
+Pendiente: qué queda sin hacer de lo pedido y por qué (si no hay, omitir)
+```
+
+El agente elige el formato según la complejidad de la tarea. No usar el extendido para tareas simples (un archivo, sin breaking changes, nada pendiente).
+
+Ejemplos formato estándar:
+
+- `✅ PARA QUÉ SERVÍA ESTO: Centralizar scripts globales | POR QUÉ: Evitar duplicados entre proyectos`
+- `✅ PARA QUÉ SERVÍA ESTO: Arreglar encoding psycopg2 | POR QUÉ: Alembic fallaba en Windows con español`
+
+Ejemplo formato extendido:
+
+```
+✅ PARA QUÉ SERVÍA ESTO: Migrar autenticación a JWT | POR QUÉ: Sesiones no escalaban con múltiples servicios
+
+Cambios: auth/jwt.py (nuevo), auth/session.py (eliminado), main.py (middleware JWT), tests/test_auth.py (nuevos tests)
+Breaking changes: /api/login ahora devuelve {token} en vez de set-cookie — afecta a carta-astral-app y SALUD
+Pendiente: Actualizar los 2 consumidores para usar el token en header
+```
+
+### Pendientes explícitos
+
+- ⭐⭐ **Si quedan cosas pendientes de lo pedido, listarlas explícitamente.** No terminar con "ya casi está" sin decir qué falta. Si algo no se completó, se lista con claridad: qué queda, por qué no se hizo, y si necesita acción del usuario. Si el agente sabe que algo puede fallar o necesita revisión, lo dice — no se asume que "el usuario ya lo verá".
+
+### Reglas nacidas de bugs reales
+
+- ⭐⭐⭐ **Cuando se detecta un bug o problema recurrente no cubierto por ninguna regla, crear una regla nueva que lo prevenga.** Marcarla con `_(🐛 origen: descripción del bug)_` para distinguirla de las teóricas. Las reglas con 🐛 son las más importantes — no se eliminan ni fusionan sin justificación explícita.
+
+**IMPORTANTE:** El formato estándar (`✅ PARA QUÉ SERVÍA ESTO...`) se configura también en **Cursor Settings → Rules for AI** (User Rule global) para que aplique a TODOS los proyectos. Texto exacto para pegar en Cursor Settings:
+
+> `Al terminar cada tarea añade siempre al final: ✅ PARA QUÉ SERVÍA ESTO: [una frase] | POR QUÉ: [una frase]`
+
+---
+
+## Sincronización automática de reglas
+
+Cuando se modifique `REGLAS_DESARROLLO.md`, ejecutar inmediatamente:
+
+```powershell
+D:\services\scripts\sync-global-rules.ps1
+```
+
+Esto propaga los cambios a todos los proyectos del ecosistema.
+
+---
+
+## Planificación
+
+### Ubicación de planes
+
+- **Planes activos:** `docs/PLAN_nombre.md` en la raíz de docs del proyecto.
+- **Planes completados u obsoletos:** `docs/historial/PLAN_nombre.md`.
+- **`.cursor/plans/`:** no se versiona (`.gitignore`). Si un plan de Cursor tiene valor, se copia manualmente a `docs/PLAN_nombre.md`.
+
+### Cabecera obligatoria de estado
+
+Todo plan activo debe empezar con esta línea (blockquote):
+
+```
+> Estado: ACTIVO | Creado: YYYY-MM-DD | Última revisión: YYYY-MM-DD
+```
+
+- El agente actualiza "Última revisión" cada vez que modifica el plan.
+- Si un plan lleva más de 30 días sin revisión → mover a `docs/historial/` o actualizar con fecha nueva.
+- Planes en `docs/historial/` cambian el estado a COMPLETADO o ARCHIVADO (no necesitan fecha de revisión).
+
+### Formato obligatorio de un plan
+
+Todo archivo `PLAN_*.md` debe contener estas secciones:
+
+1. **Cabecera de estado** — Línea `> Estado: ACTIVO | Creado: ... | Última revisión: ...`
+2. **Objetivo** — Qué se quiere conseguir (1-2 frases).
+3. **Tareas** — Tabla con: tarea, prioridad (alta/media/baja), esfuerzo estimado (bajo/medio/alto), dependencias.
+4. **Riesgos y regresiones** — Qué puede salir mal, qué se puede romper.
+5. **Aprobación** — Pedir OK explícito del usuario antes de implementar.
+
+Opcional:
+- **Referencias** — Links a ROADMAP.md, PENDIENTES.md, ECOSYSTEM.md cuando aplique.
+
+> No se estiman tiempos en horas. El esfuerzo se mide como bajo/medio/alto.
+
+---
+
+## UX — Diseño de interfaces
+
+- ⭐⭐ **El usuario elige, no escribe.** Toda interacción mediante elementos seleccionables (dropdowns, checkboxes, tarjetas clickables, toggles). Sin campos de texto libre salvo que sea estrictamente necesario.
+- ⭐⭐ **Pensado para TDAH:** opciones claras, sin ambigüedad, sin recordar nada de memoria.
+- ⭐ **Listas y checklists sobre párrafos.** Siempre que haya 3 o más items relacionados, usar lista o checklist en vez de párrafo de texto. Los pasos de un proceso van numerados. Las opciones sin orden van con bullets. Las tareas pendientes o verificaciones van con checkboxes `- [ ]`. Nunca meter 4 pasos en una frase con comas.
+- ⭐⭐ **Accesibilidad básica obligatoria.** Todo componente interactivo tiene `aria-label`, contraste suficiente (WCAG AA mínimo) y funciona con teclado. No es opcional — un producto profesional lo requiere.
+- ⭐⭐ **Manejo de estados de carga y error siempre.** Toda llamada a API muestra: estado de carga (spinner/skeleton), estado de error (mensaje claro en español) y estado vacío (no pantalla en blanco). Nunca un componente que simplemente "no aparece" si falla.
+- ⭐⭐ **Responsive obligatorio.** Todo lo que se construye debe funcionar en móvil y escritorio. El enfoque (mobile-first o desktop-first) se define al inicio de cada proyecto según su uso principal. Si no se especifica, se asume mobile-first. No se cierra fase sin verificar en ambos tamaños.
+
+
+---
+
+> **IMPORTANTE:** Si modificas REGLAS_DESARROLLO.md, recuerda ejecutar D:\services\scripts\sync-global-rules.ps1 para propagar los cambios a todos los proyectos.
