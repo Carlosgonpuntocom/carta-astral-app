@@ -25,11 +25,23 @@ npm install
 
 ### **PASO 2: Ejecutar la Aplicación**
 
-Una vez instaladas las dependencias, ejecuta:
+Una vez instaladas las dependencias, puedes arrancar de cualquiera de estas formas:
+
+**Opción A — Terminal**
 
 ```bash
 npm run dev
 ```
+
+**Opción B — Windows (`start.bat`)**
+
+Haz doble clic en `start.bat` en la raíz del proyecto. Equivale a ejecutar `npm run dev` desde esa carpeta (usa la ruta del propio script, no hace falta abrir la terminal a mano).
+
+**Acceso directo en el escritorio**
+
+1. Clic derecho en `start.bat` → **Enviar a** → **Escritorio (crear acceso directo)**  
+   o crea un acceso directo cuyo destino sea la ruta completa a `start.bat` del repo (por ejemplo `D:\projects\carta-astral-app\start.bat`).
+2. La primera vez sigue siendo necesario haber ejecutado `npm install` en el proyecto (PASO 1).
 
 **¿Qué hace esto?**
 - Inicia el servidor de desarrollo
@@ -76,6 +88,7 @@ npm run dev
 
 ```
 carta-astral-app/
+├── start.bat              # Arranque en Windows (doble clic o acceso directo)
 ├── src/
 │   ├── main/              # Proceso principal de Electron
 │   ├── preload/           # Scripts de preload (seguridad)
@@ -92,6 +105,7 @@ carta-astral-app/
 
 ## 🛠️ Comandos Disponibles
 
+- `start.bat` (Windows) - Inicia la app en modo desarrollo; mismo efecto que `npm run dev` desde la raíz del proyecto
 - `npm run dev` - Inicia la aplicación en modo desarrollo
 - `npm run build` - Compila la aplicación para producción
 - `npm run preview` - Previsualiza la versión de producción
@@ -109,8 +123,9 @@ carta-astral-app/
 
 ## 🐛 Solución de Problemas
 
-### **Error: "npm no se reconoce"**
+### **Error: "npm no se reconoce"** (también al usar `start.bat`)
 - Instala Node.js desde [nodejs.org](https://nodejs.org/)
+- Si al hacer doble clic en `start.bat` falla pero en una terminal abierta desde el IDE sí funciona, Node puede no estar en el PATH del Explorador de archivos: reinstala Node marcando la opción de añadir al PATH o reinicia sesión
 
 ### **Error al instalar dependencias**
 - Ejecuta la terminal como administrador
