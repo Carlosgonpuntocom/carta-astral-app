@@ -123,11 +123,14 @@ carta-astral-app/
 
 Si quieres usar **Generar resumen con IA** en la vista de carta:
 
-1. En `D:\services\ai-service`, arranca el servicio (p. ej. `start.bat`) y asegúrate de que el **proveedor** (p. ej. Ollama) esté activo con el modelo configurado en ese servicio.
-2. Por defecto la app usa `http://127.0.0.1:8100`. Para cambiar la URL, copia `.env.example` a `.env` en la raíz de este proyecto y ajusta `VITE_AI_SERVICE_URL`.
-3. Vuelve a ejecutar `npm run dev` tras modificar `.env`.
+1. **Al abrir la app** (proceso principal de Electron), si `GET /health` en el puerto **8100** falla, se intenta arrancar **`D:\services\ai-service\start.bat`** en una ventana minimizada (Windows). En macOS/Linux hace falta definir **`SERVICES_ROOT`** con la ruta al monorepo `services` y existirá `ai-service/start.sh`. Desactivar: **`AUTO_START_AI_SERVICE=0`** en el entorno o en `.env` (ver `.env.example`).
+2. Asegúrate de que el **proveedor** (p. ej. Ollama) esté activo con el modelo configurado en ai-service; la primera vez ai-service puede crear `.env` desde `.env.example` y pedirte editarlo.
+3. Por defecto la URL es `http://127.0.0.1:8100`. Para cambiarla, copia `.env.example` a `.env` y ajusta **`VITE_AI_SERVICE_URL`** (renderer) y, si aplica, **`AI_SERVICE_URL`** (comprobación / auto-arranque en el main).
+4. Vuelve a ejecutar `npm run dev` tras modificar `.env`.
 
-Sin ai-service arrancado, el botón mostrará un error claro (conexión, timeout o servicio no disponible); el resto de la app sigue funcionando.
+Sin ai-service disponible, el botón mostrará un error claro; el resto de la app sigue funcionando.
+
+**Alcance del asistente:** hoy solo está en la **vista de una carta** (resumen divulgativo y pregunta opcional sobre esa carta). No hay bloque IA en comparación de cartas, tránsitos ni matriz de compatibilidad. Qué hace exactamente, qué pantallas lo excluyen y **dónde tendría sentido extenderlo** (prioridades y notas técnicas) está documentado en [`docs/PLAN_AI_SERVICE.md`](docs/PLAN_AI_SERVICE.md) → sección *Asistente IA: alcance actual y otras pantallas*.
 
 ---
 

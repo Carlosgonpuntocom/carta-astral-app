@@ -1,4 +1,4 @@
-> Estado: ACTIVO | Creado: 2026-03-26 | Última revisión: 2026-03-27
+> Estado: ACTIVO | Creado: 2026-03-26 | Última revisión: 2026-03-28
 
 # Plan: integración Carta Astral con ai-service
 
@@ -17,13 +17,15 @@ Integrar la app Electron con **ai-service** (`localhost:8100`) mediante un clien
 | Cliente `ai-service-client.ts` + `chartDataToPromptContext` + timeout y errores en español | Alta | Medio | Ninguna |
 | Tests Vitest (fetch mockeado: health, chat 200, 503, timeout; asserts sobre URL/cuerpo) | Alta | Medio | Cliente |
 | Componente `ChartAiAssistant` + integración en `ChartView` (UX carga/error, a11y) | Alta | Medio | Cliente |
-| `.env.example` + README (Ollama, ai-service, `VITE_AI_SERVICE_URL`) | Media | Bajo | Ninguna |
-| Actualizar `D:\services\docs\projects\CARTA_ASTRAL.md` + `sync-services.ps1` | Media | Bajo | Ninguna |
+| `.env.example` + README (Ollama, ai-service, `VITE_AI_SERVICE_URL`, auto-arranque) | Media | Bajo | Ninguna |
+| Proceso **main** Electron: comprobar `/health` y lanzar `ai-service/start.bat` (o `start.sh`) si no responde — `ensure-ai-service.ts`, `load-local-env.ts`, tests en `src/__tests__/main/` | Media | Medio | Ninguna |
+| Actualizar `D:\services\docs\projects\CARTA_ASTRAL.md` + ejecutar `sync-services.ps1` tras cambios en la ficha | Media | Bajo | Ninguna |
 | Cierre: checklist auditoría reglas (sección más abajo) | Alta | Bajo | Todo lo anterior |
 
 ## Riesgos y regresiones
 
 - **ai-service u Ollama apagados:** la carta debe seguir funcionando; solo el bloque IA muestra error claro.
+- **Auto-arranque:** si `SERVICES_ROOT` o la ruta por defecto no existen, o el script falla, la consola del proceso main debe mostrar el error; la ventana de la app no debe bloquearse esperando el servicio.
 - **Latencia alta:** timeout acotado (p. ej. 45–60 s) y estado de carga visible.
 - **Datos personales en el prompt:** por defecto flujo local (Ollama); documentar si en el futuro se usa OpenAI.
 - **Regresión en tests existentes:** ejecutar `npm test -- --run` antes de cerrar (0 failed, 0 skipped, 0 warnings).
@@ -35,6 +37,7 @@ No implementar hasta **OK explícito** del responsable del proyecto (regla de fa
 ## Referencias
 
 - Contrato: `POST /chat`, `GET /health` en `D:\services\ai-service\main.py`
+- Arranque asistido: `src/main/ensure-ai-service.ts`, carga `.env` en main: `src/main/load-local-env.ts`
 - Vista carta: `src/renderer/components/ChartView.tsx`, `App.tsx`
 - Ficha ecosistema: `D:\services\docs\projects\CARTA_ASTRAL.md`
 - Reglas: `.cursor/rules/global-rules.mdc` (fuente `D:\services\docs\REGLAS_DESARROLLO.md`)
@@ -67,20 +70,91 @@ sequenceDiagram
 2. Opcional: campo **Pregunta sobre esta carta** (misma llamada `POST /chat`).
 3. Si `GET /health` falla o `POST /chat` devuelve 503/502/timeout: mensaje en español y guía para arrancar ai-service/Ollama. Sin `catch` vacío.
 
+## Arranque automático de ai-service (Electron main)
+
+Al iniciar la app, el **proceso principal** (`src/main/main.ts`):
+
+1. Carga variables desde `.env` en la raíz del proyecto (`load-local-env.ts`) sin sobrescribir las ya definidas en el sistema.
+2. Si `AUTO_START_AI_SERVICE` no es `0` / `false` / `off` / `no`, hace `GET` a `{AI_SERVICE_URL}/health` (timeout corto, ~2,5 s). Si responde OK, no hace nada más.
+3. Si no responde, resuelve la ruta al script de arranque:
+   - **Windows:** `SERVICES_ROOT` o por defecto `D:\services` → `ai-service\start.bat`.
+   - **macOS / Linux:** obligatorio `SERVICES_ROOT` → `ai-service/start.sh` (vía `bash`).
+4. Lanza el script en **proceso independiente** (ventana minimizada en Windows) y **reintenta** health hasta ~60 s; el resultado se registra en la **consola** del proceso main (éxito o mensaje de error explícito).
+
+**Desactivar:** `AUTO_START_AI_SERVICE=0` en `.env` o en el entorno.
+
+**Nota:** Si `ai-service` no tiene `.env`, su `start.bat` puede pausar pidiendo configuración; es el comportamiento propio del servicio, no de Carta Astral.
+
 ## Implementación (resumen)
 
 | Área | Acción |
 |------|--------|
-| Config | `VITE_AI_SERVICE_URL` default `http://127.0.0.1:8100` en `.env.example` y README |
+| Config | `VITE_AI_SERVICE_URL` y `AI_SERVICE_URL` default `http://127.0.0.1:8100`; `SERVICES_ROOT`; `AUTO_START_AI_SERVICE` en `.env.example` y README |
+| Main | `ensureAiServiceRunning()` al `app.whenReady()` (no bloquea la UI); Windows: `start.bat` minimizado; Unix: `bash` + `start.sh` si `SERVICES_ROOT` está definido |
 | Cliente | `src/renderer/lib/ai/ai-service-client.ts`: `AbortSignal.timeout` o `AbortController`, `GET /health`, `POST /chat`, tipos alineados con FastAPI |
 | Contexto | Función pura `chartDataToPromptContext(chart)` solo con datos ya calculados |
 | UI | `ChartAiAssistant.tsx` en `ChartView` con `CollapsibleSection`, `aria-label`, resultado scrollable |
 | Tests | Vitest con mocks que validen comportamiento real del cliente |
 | Ecosistema | `CARTA_ASTRAL.md` + `D:\services\scripts\claude-context\sync-services.ps1` |
 
+## Asistente IA: alcance actual y otras pantallas (valoración de producto)
+
+Documentación de **qué hace hoy** el bloque IA, **dónde está cableado**, **dónde no**, y **dónde tendría sentido extenderlo** (prioridades y notas técnicas). La implementación sigue siendo opcional por vista; esta sección es la referencia para futuros `feat:`.
+
+### Comportamiento actual (MVP implementado)
+
+| Aspecto | Detalle |
+|---------|---------|
+| **Ubicación UI** | Solo en la vista de **una carta natal**: componente `ChartAiAssistant` dentro de [`ChartView.tsx`](../src/renderer/components/ChartView.tsx), visible en todos los modos de esa vista (detallada / gamificada / aspectos). |
+| **Entrada de datos** | Siempre se envía el contexto JSON generado por [`chartDataToPromptContext`](../src/renderer/lib/ai/chart-prompt-context.ts) a partir de `ChartData` (nacimiento, ascendente, MC, planetas, aspectos). |
+| **Sin pregunta opcional** | El mensaje de usuario pide explícitamente un **resumen divulgativo** coherente con esos datos (`requestChartSummary` en [`ai-service-client.ts`](../src/renderer/lib/ai/ai-service-client.ts)). |
+| **Con pregunta opcional** | Misma llamada `POST /chat`; el cuerpo incluye `Pregunta del usuario: …` para que el modelo responda **acotado a la carta** (no es un chat libre general). |
+| **System prompt** | Fijo en código (`AI_CHART_SYSTEM_PROMPT`): español, solo sobre datos recibidos, sin médico/legal/financiero, sin certezas absolutas sobre personalidad/futuro. |
+| **Backend** | Un único endpoint de app: **ai-service** `POST /chat` (y errores gestionados como en el plan). |
+
+### Pantallas donde **no** hay asistente IA hoy
+
+| Vista en `App.tsx` | Componente principal | Notas |
+|--------------------|----------------------|--------|
+| `compare` | [`CompareView.tsx`](../src/renderer/components/CompareView.tsx) | Sin `ChartAiAssistant` ni llamadas a `ai-service`. |
+| `transits` | [`TodayDashboard`](../src/renderer/components/Transits/TodayDashboard.tsx) | Tránsitos del día / calendario; sin bloque IA. |
+| `compatibility-matrix` | [`CompatibilityMatrix.tsx`](../src/renderer/components/CompatibilityMatrix.tsx) | Matriz numérica; sin IA. |
+| `transit-reminders` | [`TransitReminders.tsx`](../src/renderer/components/Transits/TransitReminders.tsx) | Recordatorios; sin IA. |
+| `home` | [`HomePage.tsx`](../src/renderer/components/HomePage.tsx) | Hub; sin contexto de una carta concreta en pantalla. |
+| Formularios (`add-person`, `edit-person`, `edit-my-chart`) | `AddPersonForm` | No hay carta calculada que interpretar. |
+
+La vista `chart` (demo, mi carta o carta de otra persona cargada con `currentChartData`) **sí** incluye el asistente, porque todas pasan por `ChartView`.
+
+### Valoración: dónde extender el asistente (prioridad sugerida)
+
+Orden pensado para **alineación con la intención del usuario** (interpretar resultados ya calculados) y para **evitar redundancia** (no repetir el mismo bloque en tres sitios sin criterio).
+
+| Prioridad | Pantalla | Por qué encaja | Matices |
+|-----------|----------|----------------|---------|
+| **Alta** | **Comparación de cartas** (`CompareView`) | Es donde se busca **significado de la relación** (sinastría), no solo tablas. IA útil: resumen de la dinámica entre dos mapas, tensiones/armonías, pregunta opcional (“¿dónde nos complementamos?”). | Hace falta **nuevo serializador de contexto** (dos `ChartData`, nombres, y opcionalmente aspectos intercartas si se exponen en esa vista). **No** reutilizar solo `chartDataToPromptContext` de una carta. |
+| **Alta** | **Tránsitos** (`TodayDashboard`) | Valor distinto al natal: **“qué hace esto hoy / esta semana”**. IA útil: resumen del día o respuesta sobre tránsitos listados. | El prompt debe incluir **tránsitos calculados** (fechas, orbes, planetas, etc.), no únicamente el JSON natal. Requiere función pura nueva que serialice lo que ya muestra el dashboard. |
+| **Media** | **Matriz de compatibilidad** | Vista sobre todo **exploración numérica**; muchos usuarios pasan a **Comparar** para el detalle. | Un bloque IA “lectura general de la matriz” puede **solaparse** con IA en `CompareView`. Valorar **una sola** narrativa profunda (p. ej. solo comparación) antes de duplicar. |
+| **Media** | **Recordatorios de tránsitos** | Podría **priorizar o agrupar** en lenguaje natural una lista larga de eventos. | Menos imprescindible que el dashboard de “hoy”; depende del uso real de esa pantalla. |
+| **Baja** | **Home**, listados | Demasiado genérico; no hay un resultado astrológico único en foco. | Mejor mantener el asistente **por contexto concreto** (natal / pareja / momento). |
+
+### Principio de diseño
+
+- **Un bloque canónico por tipo de contexto:** natal (hecho), **relación** (dos cartas), **momento** (tránsitos). Evitar tres copias del mismo texto genérico en subvistas de la misma carta si ya existe en `ChartView`.
+- **Sin cambiar el contrato de ai-service** para estas extensiones: siguen siendo mensajes + `system_prompt`; puede añadirse un `system_prompt` específico por modo (comparación / tránsitos) en código.
+
+### Checklist antes de implementar una nueva ubicación
+
+- [ ] Definir **función pura** de contexto (tests con datos de ejemplo).
+- [ ] Definir **system prompt** (o constante) acorde al modo (mismas líneas rojas: no inventar datos, no médico/legal, etc.).
+- [ ] Reutilizar `ChartAiAssistant` con props (`title`, `buildContext`, `systemPrompt`) **o** componente hermano que comparta UX (carga/error/a11y).
+- [ ] `npm test -- --run` y prueba manual con ai-service + proveedor.
+
+---
+
 ## Fuera de alcance (fases futuras)
 
 - Auth hacia ai-service; historial multi-turno persistente; sustituir todas las interpretaciones por IA; logging-service (plan aparte: `docs/PLAN_LOGGING_SERVICE.md`).
+- **Extensiones de UI** valoradas en la sección *Asistente IA: alcance actual y otras pantallas* (comparación, tránsitos, etc.): documentadas aquí; **implementación pendiente** salvo el MVP en `ChartView`.
 
 ## Auditoría — reglas repo y Cursor (obligatoria antes de cerrar)
 
