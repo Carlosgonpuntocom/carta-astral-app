@@ -82,17 +82,33 @@ sequenceDiagram
 
 ## Auditoría — reglas repo y Cursor (obligatoria antes de cerrar)
 
-**Fuentes:**
+**Fuentes de verdad:**
 
 | Ámbito | Ubicación |
 |--------|-----------|
-| Reglas ecosistema (67) | `d:\projects\carta-astral-app\.cursor\rules\global-rules.mdc` → fuente `D:\services\docs\REGLAS_DESARROLLO.md` |
+| Reglas ecosistema (67) | `d:\projects\carta-astral-app\.cursor\rules\global-rules.mdc` → `D:\services\docs\REGLAS_DESARROLLO.md` |
 | Cursor en este repo | Solo `global-rules.mdc` |
 | Docs en `D:\services` | `D:\services\.cursor\rules\documentation-sync.mdc`, `ecosystem-context.mdc` |
+| Plan versionado | Este archivo `docs/PLAN_AI_SERVICE.md` |
 
-**Checklist:** tests 0/0/0; mocks no vacíos; timeout explícito; errores visibles en ES; TypeScript strict sin `any` innecesario; system prompt en código; UX carga/error/vacío y a11y; `.env.example` actualizado; no loguear PII del prompt; commits sin `--no-verify`; sync `docs-claude` por script; consumir ai-service sin duplicar motor LLM; cierre PARA QUÉ / POR QUÉ y pendientes explícitos.
+**Checklist por sector (aplicable a esta feature):**
 
-**Poco aplicable:** Python/Pydantic; `start.bat` de servicios Python; otros `.mdc` de services no tocados.
+1. **Calidad y testing** — `npm test -- --run`: 0 failed, 0 skipped, 0 warnings. Mocks que verifiquen **URL** (`/health`, `/chat`), **cuerpo** (mensajes, `system_prompt` si aplica) y **timeout**, no mocks vacíos 🐛. Si no hay prueba E2E con ai-service + proveedor real: **pedir prueba manual** antes de cerrar.
+2. **Errores y HTTP** — Timeout explícito en **cada** llamada a ai-service. Sin `catch` vacío; errores de red y 502/503 visibles para el usuario en **español** en la UI del bloque IA (sin bloquear el resto de la app).
+3. **TypeScript** — Tipos estrictos para request/response (`ChatRequest` / `ChatResponse` alineados con FastAPI); sin `any` innecesario.
+4. **IA y producto (⭐⭐⭐)** — **System prompt y límites del rol fijados en código**; el modelo elabora sobre datos ya calculados; no sustituye la lógica de negocio ni posiciones. Ningún mensaje crítico al usuario depende solo del LLM sin control del código.
+5. **UX / frontend** — Estados **carga, error y vacío** en el bloque IA; **accesibilidad** (`aria-label`, teclado donde aplique); **responsive** coherente con `ChartView`.
+6. **Seguridad** — No subir `.env`; actualizar `.env.example` con `VITE_AI_SERVICE_URL`. No **loguear** el prompt completo con datos personales en producción; no hardcodear API keys.
+7. **Variables de entorno** — Documentar en el mismo commit en que se lea la variable en el cliente.
+8. **API REST (consumidor)** — Interpretar errores FastAPI (`detail`); manejar 503/502/422 sin asumir 200 con error en body.
+9. **Commits** — Nunca `--no-verify`; separar commits cuando haya `feat:` + `docs:` ecosistema.
+10. **Documentación `D:\services`** — Tras `CARTA_ASTRAL.md`: `sync-services.ps1`; no editar a mano `docs-claude/`.
+11. **Arquitectura** — Consumir **ai-service** existente; no embeber motor LLM propio en la app.
+12. **Comunicación** — Cierre con PARA QUÉ / POR QUÉ; pendientes explícitos (p. ej. prueba manual con Ollama).
+
+**Poco aplicable:** convenciones Python/Pydantic en servicios no tocados; `start.bat` de servicios Python; otros `.mdc` de `D:\services` salvo que se editen esas carpetas.
+
+**Entregable de auditoría:** revisar esta lista contra el diff y anotar si hubo verificación manual con ai-service (:8100).
 
 ## Orden de trabajo
 
