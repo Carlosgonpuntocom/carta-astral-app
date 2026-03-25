@@ -24,11 +24,8 @@ const INTERPRETATIONS: Record<string, string> = {
   'Mercurio_trine_Mercurio': 'Comunicación fluida. Buen momento para negocios y estudios.',
   
   // Venus transitando
-  'Venus_conjunction_Venus': 'Retorno de Venus. Renovación en relaciones y valores.',
   'Venus_conjunction_Sol': 'Armonía en relaciones. Atractivo y carisma aumentados.',
   'Venus_conjunction_Luna': 'Emociones placenteras. Conexión emocional en relaciones.',
-  'Venus_square_Venus': 'Desafíos en relaciones. Necesitas revisar valores.',
-  'Venus_trine_Venus': 'Armonía en relaciones y creatividad. Momentos de belleza.',
   
   // Marte transitando
   'Marte_conjunction_Marte': 'Retorno de Marte. Energía y acción renovadas.',
@@ -55,8 +52,6 @@ const INTERPRETATIONS: Record<string, string> = {
   // Urano transitando
   'Urano_conjunction_Sol': 'Cambios súbitos e inesperados. Liberación y libertad.',
   'Urano_conjunction_Luna': 'Cambios emocionales inesperados. Necesitas adaptabilidad.',
-  'Urano_square_Sol': 'Revoluciones personales. Cambios disruptivos necesarios.',
-  'Urano_trine_Sol': 'Innovación y libertad. Oportunidades de cambio positivo.',
   
   // Neptuno transitando
   'Neptuno_conjunction_Sol': 'Inspiración y espiritualidad. Período de idealismo.',
@@ -71,7 +66,6 @@ const INTERPRETATIONS: Record<string, string> = {
   'Plutón_trine_Sol': 'Transformación positiva. Poder personal renovado.',
   
   // Tránsitos a Ascendente
-  'Sol_conjunction_Ascendente': 'Nuevo ciclo personal. Autoconfianza y proyección.',
   'Luna_conjunction_Ascendente': 'Sensibilidad aumentada. Momentos de cambio emocional.',
   'Marte_conjunction_Ascendente': 'Energía y acción. Momento para iniciar proyectos.',
   'Venus_conjunction_Ascendente': 'Atractivo y carisma. Buen momento para relaciones.',
