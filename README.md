@@ -119,9 +119,21 @@ carta-astral-app/
 
 ---
 
+## Asistente de IA con ai-service (opcional)
+
+Si quieres usar **Generar resumen con IA** en la vista de carta:
+
+1. En `D:\services\ai-service`, arranca el servicio (p. ej. `start.bat`) y asegúrate de que el **proveedor** (p. ej. Ollama) esté activo con el modelo configurado en ese servicio.
+2. Por defecto la app usa `http://127.0.0.1:8100`. Para cambiar la URL, copia `.env.example` a `.env` en la raíz de este proyecto y ajusta `VITE_AI_SERVICE_URL`.
+3. Vuelve a ejecutar `npm run dev` tras modificar `.env`.
+
+Sin ai-service arrancado, el botón mostrará un error claro (conexión, timeout o servicio no disponible); el resto de la app sigue funcionando.
+
+---
+
 ## ⚠️ Notas Importantes
 
-1. **Datos personales**: Todo se guarda localmente en tu PC, nada se envía a internet
+1. **Datos personales**: Lo esencial se guarda localmente en tu PC. Si usas el **asistente de IA**, los datos de la carta calculada se envían solo a **ai-service** en tu máquina (p. ej. `127.0.0.1:8100`), no a internet salvo que ese servicio esté configurado para usar un proveedor externo
 2. **Primera ejecución**: La primera vez puede tardar más en compilar
 3. **Modo desarrollo**: Verás la consola de desarrollador abierta (F12), es normal
 4. **Guardado**: Los datos se guardan automáticamente en `data/chart.json`

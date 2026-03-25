@@ -9,6 +9,7 @@ import PlanetLink from './Transits/PlanetLink'
 import SignLink from './Chart/SignLink'
 import HouseLink from './Chart/HouseLink'
 import CollapsibleSection from './CollapsibleSection'
+import ChartAiAssistant from './Chart/ChartAiAssistant'
 
 interface ChartViewProps {
   chartData: ChartData
@@ -224,6 +225,8 @@ export default function ChartView({ chartData }: ChartViewProps) {
           Aspectos
         </button>
       </div>
+
+      <ChartAiAssistant chartData={chartData} />
 
       {/* Contenido según modo de vista */}
       {viewMode === 'game' ? (
