@@ -37,6 +37,7 @@ No implementar hasta **OK explícito** del responsable del proyecto (regla de fa
 ## Referencias
 
 - **App vs services (dónde implementar qué):** sección *Dónde trabajar: repo de la app vs `D:\services`* más abajo.
+- **Plan gateway (contrato HTTP, timeouts, consumidores, seguridad, auditoría de reglas):** `D:\services\docs\PLAN_AI_SERVICE_GATEWAY.md`
 - Contrato: `POST /chat`, `GET /health` en `D:\services\ai-service\main.py`
 - Arranque asistido: `src/main/ensure-ai-service.ts`, carga `.env` en main: `src/main/load-local-env.ts`
 - Vista carta: `src/renderer/components/ChartView.tsx`, `App.tsx`
@@ -110,7 +111,7 @@ Documentación de **qué hace hoy** el bloque IA, **dónde está cableado**, **d
 | **Entrada de datos** | Siempre se envía el contexto JSON generado por [`chartDataToPromptContext`](../src/renderer/lib/ai/chart-prompt-context.ts) a partir de `ChartData` (nacimiento, ascendente, MC, planetas, aspectos). |
 | **Sin pregunta opcional** | El mensaje de usuario pide explícitamente un **resumen divulgativo** coherente con esos datos (`requestChartSummary` en [`ai-service-client.ts`](../src/renderer/lib/ai/ai-service-client.ts)). |
 | **Con pregunta opcional** | Misma llamada `POST /chat`; el cuerpo incluye `Pregunta del usuario: …` para que el modelo responda **acotado a la carta** (no es un chat libre general). |
-| **System prompt** | Fijo en código (`AI_CHART_SYSTEM_PROMPT`): español, solo sobre datos recibidos, sin médico/legal/financiero, sin certezas absolutas sobre personalidad/futuro. |
+| **System prompt** | Fijo en código (`AI_CHART_SYSTEM_PROMPT`): español, ceñirse al JSON (planetas con signo/casa exactos, aspectos solo del array, no mezclar cuerpos); refuerzo breve en el mensaje de usuario (`USER_CHART_VERIFICATION_TAIL`); sin médico/legal/financiero, sin certezas absolutas sobre personalidad/futuro. |
 | **Backend** | Un único endpoint de app: **ai-service** `POST /chat` (y errores gestionados como en el plan). |
 
 ### Pantallas donde **no** hay asistente IA hoy
