@@ -52,7 +52,8 @@ describe('planet-colors', () => {
 
     it('debe devolver el color correcto para Luna', () => {
       const color = getPlanetColor('Luna')
-      expect(color.text).toBe('text-gray-600')
+      expect(color.text).toBe('text-slate-500')
+      expect(color.hover).toBe('hover:text-slate-600')
     })
 
     it('debe devolver el color correcto para Venus', () => {

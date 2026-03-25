@@ -80,13 +80,13 @@ describe('people-storage', () => {
       // Simular que no hay electronAPI
       delete (global as any).window.electronAPI
 
-      // Mock localStorage
       const mockPeople = [mockPerson]
-      ;(localStorage.getItem as any).mockReturnValue(JSON.stringify(mockPeople))
+      const stored = JSON.stringify(mockPeople)
+      ;(localStorage.getItem as any).mockReturnValue(stored)
 
       const result = await loadPeople()
 
-      expect(result).toEqual(mockPeople)
+      expect(result).toEqual(JSON.parse(stored))
       expect(localStorage.getItem).toHaveBeenCalledWith('people')
 
       // Restaurar
@@ -158,10 +158,10 @@ describe('people-storage', () => {
       mockElectronAPI.readPeople.mockResolvedValue(people)
       mockElectronAPI.savePeople.mockResolvedValue(true)
 
-      const result = await deletePerson('test-id-1')
+      const result = await deletePerson('test-id-2')
 
       expect(result).toBe(true)
-      expect(mockElectronAPI.savePeople).toHaveBeenCalled()
+      expect(mockElectronAPI.savePeople).toHaveBeenCalledWith([mockPerson])
     })
 
     it('debe manejar eliminación de persona inexistente', async () => {

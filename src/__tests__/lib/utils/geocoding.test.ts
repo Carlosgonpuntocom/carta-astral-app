@@ -1,5 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { geocodePlace, geocodePlaceWithDebounce } from '../../../renderer/lib/utils/geocoding'
+import {
+  geocodePlace,
+  geocodePlaceWithDebounce,
+  resetGeocodeDebounceStateForTests
+} from '../../../renderer/lib/utils/geocoding'
 
 // Mock de fetch global
 global.fetch = vi.fn()
@@ -8,10 +12,13 @@ describe('geocoding', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.useFakeTimers()
+    vi.setSystemTime(new Date('2024-06-01T12:00:00.000Z'))
+    resetGeocodeDebounceStateForTests()
   })
 
   afterEach(() => {
     vi.useRealTimers()
+    resetGeocodeDebounceStateForTests()
   })
 
   describe('geocodePlace', () => {
@@ -110,13 +117,11 @@ describe('geocoding', () => {
 
       ;(global.fetch as any).mockResolvedValue(mockResponse)
 
-      // geocodePlaceWithDebounce es async, respeta tiempo mínimo entre llamadas
       const result1 = await geocodePlaceWithDebounce('Palma')
-      
-      // Avanzar tiempo para que la segunda llamada no sea bloqueada
-      vi.advanceTimersByTime(1100)
-      
-      const result2 = await geocodePlaceWithDebounce('Palma de Mallorca')
+
+      const p2 = geocodePlaceWithDebounce('Palma de Mallorca')
+      await vi.advanceTimersByTimeAsync(1100)
+      const result2 = await p2
 
       expect(result1).toBeDefined()
       expect(result2).toBeDefined()
@@ -137,15 +142,10 @@ describe('geocoding', () => {
 
       ;(global.fetch as any).mockResolvedValue(mockResponse)
 
-      // Primera llamada
       await geocodePlaceWithDebounce('Madrid')
-      
-      // Segunda llamada inmediatamente después (debe esperar)
+
       const promise = geocodePlaceWithDebounce('Barcelona')
-      
-      // Avanzar tiempo para que se complete
-      vi.advanceTimersByTime(1100)
-      
+      await vi.advanceTimersByTimeAsync(1100)
       const result = await promise
 
       expect(result).toBeDefined()

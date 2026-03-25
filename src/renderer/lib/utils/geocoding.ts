@@ -65,6 +65,11 @@ export async function geocodePlace(placeName: string): Promise<GeocodingResult |
 let lastGeocodeTime = 0
 const MIN_TIME_BETWEEN_REQUESTS = 1000 // 1 segundo
 
+/** Reinicia la ventana de rate limit (solo para tests). */
+export function resetGeocodeDebounceStateForTests(): void {
+  lastGeocodeTime = 0
+}
+
 export async function geocodePlaceWithDebounce(placeName: string): Promise<GeocodingResult | null> {
   const now = Date.now()
   const timeSinceLastRequest = now - lastGeocodeTime
