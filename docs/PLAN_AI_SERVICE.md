@@ -1,4 +1,4 @@
-> Estado: ACTIVO | Creado: 2026-03-26 | Última revisión: 2026-03-28
+> Estado: ACTIVO | Creado: 2026-03-26 | Última revisión: 2026-03-29
 
 # Plan: integración Carta Astral con ai-service
 
@@ -36,6 +36,7 @@ No implementar hasta **OK explícito** del responsable del proyecto (regla de fa
 
 ## Referencias
 
+- **App vs services (dónde implementar qué):** sección *Dónde trabajar: repo de la app vs `D:\services`* más abajo.
 - Contrato: `POST /chat`, `GET /health` en `D:\services\ai-service\main.py`
 - Arranque asistido: `src/main/ensure-ai-service.ts`, carga `.env` en main: `src/main/load-local-env.ts`
 - Vista carta: `src/renderer/components/ChartView.tsx`, `App.tsx`
@@ -148,6 +149,36 @@ Orden pensado para **alineación con la intención del usuario** (interpretar re
 - [ ] Definir **system prompt** (o constante) acorde al modo (mismas líneas rojas: no inventar datos, no médico/legal, etc.).
 - [ ] Reutilizar `ChartAiAssistant` con props (`title`, `buildContext`, `systemPrompt`) **o** componente hermano que comparta UX (carga/error/a11y).
 - [ ] `npm test -- --run` y prueba manual con ai-service + proveedor.
+
+### Dónde trabajar: repo de la **app** vs repo **`D:\services`** (ai-service)
+
+Referencia para **no olvidar** la frontera entre proyectos y evitar buscar “dónde poner la IA” en el sitio equivocado.
+
+#### División de responsabilidades
+
+| Capa | Repo / carpeta | Qué incluye |
+|------|----------------|-------------|
+| **Gateway LLM genérico** | `D:\services\ai-service` | HTTP `GET /health`, `POST /chat`; habla con Ollama/OpenAI; **no** conoce cartas, `ChartView` ni Electron. |
+| **Producto astrología + UX** | `D:\projects\carta-astral-app` | Cliente HTTP (`ai-service-client.ts`), serialización de contexto (`chart-prompt-context.ts` y futuros), **system prompts y texto del mensaje de usuario**, componentes UI (`ChartAiAssistant`), decisión de **en qué pantalla** va el bloque. |
+
+La **lógica de negocio interpretativa** (qué datos mandar, qué prohibir al modelo, en qué vista aparece el botón) vive en la **app**. **ai-service** solo ejecuta el chat con el cuerpo que le envíe el cliente.
+
+#### Qué valorar en cada repo (enfoque complementario)
+
+| Pregunta | Dónde mirar primero |
+|----------|---------------------|
+| ¿En qué **pantalla** ponemos el asistente (comparación, tránsitos, etc.)? | **App** — `App.tsx`, vistas, este plan (*Asistente IA: alcance actual y otras pantallas*). |
+| ¿Qué **JSON o texto** va en `messages` / `system_prompt`? | **App** — código en `src/renderer/lib/ai/` y prompts en TypeScript. |
+| ¿Hace falta un **nuevo contrato** HTTP, límites de payload, streaming o auth en el servidor? | **`D:\services\ai-service`** (+ documentar consumidores en `D:\services\docs\` si aplica). |
+| ¿**Varias apps** del ecosistema necesitan el mismo flujo especializado (mismo prompt + misma estructura)? | Entonces puede debatirse subir parte a **services** (endpoint o plantilla compartida); para Carta Astral hoy **no es necesario**: basta `POST /chat` genérico. |
+
+#### Idea errónea frecuente
+
+Abrir solo el monorepo **`D:\services`** para decidir **“dónde poner la IA”** en el sentido de **UX** (comparación, tránsitos, etc.) **no sustituye** el trabajo en la app: **ai-service no tiene pantallas** ni flujo de sinastría. En services tiene sentido revisar **operación del servicio**, **contrato** y **consumidores**; la **valoración de ubicaciones** del asistente sigue documentada **en este plan** (repo Carta Astral).
+
+#### Resumen en una frase
+
+**Services = puerta al modelo; app = qué contar y dónde mostrarlo.**
 
 ---
 

@@ -130,7 +130,7 @@ Si quieres usar **Generar resumen con IA** en la vista de carta:
 
 Sin ai-service disponible, el botón mostrará un error claro; el resto de la app sigue funcionando.
 
-**Alcance del asistente:** hoy solo está en la **vista de una carta** (resumen divulgativo y pregunta opcional sobre esa carta). No hay bloque IA en comparación de cartas, tránsitos ni matriz de compatibilidad. Qué hace exactamente, qué pantallas lo excluyen y **dónde tendría sentido extenderlo** (prioridades y notas técnicas) está documentado en [`docs/PLAN_AI_SERVICE.md`](docs/PLAN_AI_SERVICE.md) → sección *Asistente IA: alcance actual y otras pantallas*.
+**Alcance del asistente:** hoy solo está en la **vista de una carta** (resumen divulgativo y pregunta opcional sobre esa carta). No hay bloque IA en comparación de cartas, tránsitos ni matriz de compatibilidad. Qué hace exactamente, qué pantallas lo excluyen y **dónde tendría sentido extenderlo** (prioridades y notas técnicas) está en [`docs/PLAN_AI_SERVICE.md`](docs/PLAN_AI_SERVICE.md) → *Asistente IA: alcance actual y otras pantallas*. **Qué se implementa en esta app vs en `D:\services\ai-service`** (prompts, pantallas vs gateway HTTP) → misma guía, subsección *Dónde trabajar: repo de la app vs D:\\services*.
 
 ---
 
