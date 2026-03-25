@@ -4,7 +4,10 @@ Aplicación de escritorio para calcular y gestionar tu carta astral personal.
 
 **Documentación central del ecosistema** (visión global, índice de todos los `.md` del proyecto, rol frente a `D:\services\`): en tu máquina abre `D:\services\docs\projects\CARTA_ASTRAL.md` (monorepo de servicios; no vive dentro de este repo).
 
-**Planes activos del proyecto** (formato ecosistema): `docs/PLAN_AI_SERVICE.md` — integración opcional con ai-service (Ollama).
+**Planes activos del proyecto** (formato ecosistema):
+
+- `docs/PLAN_AI_SERVICE.md` — integración opcional con ai-service (Ollama).
+- `docs/PLAN_LOGGING_SERVICE.md` — integración opcional con logging-service (:8600).
 
 ## 📋 Instrucciones de Instalación (Paso a Paso)
 
