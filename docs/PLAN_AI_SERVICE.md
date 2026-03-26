@@ -1,4 +1,4 @@
-> Estado: ACTIVO | Creado: 2026-03-26 | Última revisión: 2026-03-29
+> Estado: ACTIVO | Creado: 2026-03-26 | Última revisión: 2026-03-30
 
 # Plan: integración Carta Astral con ai-service
 
@@ -9,6 +9,19 @@ Copia canónica en el repo del plan acordado (la versión en `.cursor/plans/` no
 ## Objetivo
 
 Integrar la app Electron con **ai-service** (`localhost:8100`) mediante un cliente HTTP con **timeout explícito**, un flujo de **resumen asistido** de la carta actual (y opcionalmente una pregunta corta), documentación y ecosistema alineados con las reglas (mensajes de sistema fijados en código, sin fallbacks silenciosos).
+
+## Hoja de ruta IA (cuatro capas)
+
+Mapa corto para **priorizar valor** con la IA sin duplicar aquí el contrato HTTP completo. Orden sugerido de lectura y trabajo:
+
+| Capa | En qué consiste | Detalle |
+|------|-----------------|---------|
+| **1. Producto / app** | Prompts fijos en código, UX del asistente, nuevos usos sobre la carta | Resto de **este plan** y rutas citadas (`ChartView`, cliente IA, tests) |
+| **2. Operación** | Timeouts del cliente, arranque de ai-service, health, errores en español | Secciones *Contexto técnico* y *Arranque automático* aquí; `ensure-ai-service.ts`, `ai-service-client.ts` |
+| **3. Gateway / contrato** | HTTP, límites, timeouts en servidor, CORS, consumidores, backlog técnico compartido | `D:\services\docs\PLAN_AI_SERVICE_GATEWAY.md` (incl. sección **I. Backlog y próximos pasos**) |
+| **4. Meta / documentación** | Docs y paquete de contexto alineados con el monorepo | Tras editar `docs/` relevantes en `D:\services`, ejecutar `powershell -ExecutionPolicy Bypass -File D:\services\scripts\claude-context\sync-services.ps1`. **No** editar a mano `docs-claude/`. |
+
+**Nota:** Cifras concretas (p. ej. timeouts en segundos) deben contrastarse con el plan gateway y con `main.py` / `providers.py` (sección 0 de ese documento).
 
 ## Tareas
 
@@ -36,6 +49,7 @@ No implementar hasta **OK explícito** del responsable del proyecto (regla de fa
 
 ## Referencias
 
+- **Índice cuatro capas (prioridad y enlaces):** sección [Hoja de ruta IA (cuatro capas)](#hoja-de-ruta-ia-cuatro-capas) más arriba.
 - **App vs services (dónde implementar qué):** sección *Dónde trabajar: repo de la app vs `D:\services`* más abajo.
 - **Plan gateway (contrato HTTP, timeouts, consumidores, seguridad, auditoría de reglas):** `D:\services\docs\PLAN_AI_SERVICE_GATEWAY.md`
 - Contrato: `POST /chat`, `GET /health` en `D:\services\ai-service\main.py`
