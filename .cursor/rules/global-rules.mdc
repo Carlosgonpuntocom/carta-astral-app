@@ -19,13 +19,13 @@ Aplican a **todos** los proyectos del ecosistema (`D:\services\`, `D:\projects\`
 > Las reglas con origen en bugs reales detectados en el ecosistema son automáticamente ⭐⭐⭐.
 > Las que afectan seguridad o pérdida de datos son ⭐⭐⭐.
 
-**Resumen: 20 ⭐⭐⭐ (30%) · 29 ⭐⭐ (43%) · 18 ⭐ (27%) · 12 con 🐛 origen documentado**
+**Resumen: 20 ⭐⭐⭐ (29%) · 29 ⭐⭐ (41%) · 21 ⭐ (30%) · 12 con 🐛 origen documentado**
 
 ---
 
 ## Índice de reglas por sector
 
-> **Total: 67 reglas** en 6 sectores + comunicación de resultados (12 marcadas con 🐛 — nacidas de bugs reales). Última actualización: 2026-03-23.
+> **Total: 70 reglas** en 6 sectores + comunicación de resultados (12 marcadas con 🐛 — nacidas de bugs reales). Última actualización: 2026-04-10.
 > Tras 11 fusiones de reglas duplicadas/solapadas, se eliminaron 16 bullets sin perder conceptos.
 >
 > **Alcance:** Las reglas de Python, TypeScript, API REST y UX aplican solo a proyectos con ese stack. Los servicios backend puros sin UI omiten las reglas de UX. El resto son globales sin excepción.
@@ -78,13 +78,14 @@ Experiencia de usuario y diseño de interfaces.
 |---------|--------|-----------|
 | UX — Diseño de interfaces | 6 | Seleccionable (no texto), TDAH-friendly, listas sobre párrafos, accesibilidad, estados carga/error, responsive |
 
-### 6. Proceso de trabajo (10 reglas)
+### 6. Proceso de trabajo (13 reglas)
 
 Cómo se trabaja con los agentes y el repositorio.
 
 | Sección | Reglas | Qué cubre |
 |---------|--------|-----------|
 | Commits y git | 4 | No --no-verify, un commit = una cosa, formato, ramas |
+| Trazabilidad | 3 | Bitácora en Git, CHANGELOG/historial, planes activos hasta cerrar |
 | Validar antes de implementar | 2 | Checklist pre-implementación (5 puntos), cuándo omitir |
 | Comunicación IA-usuario | 2 | Adaptar al nivel del usuario, preguntar preferencias |
 | Pendientes explícitos | 1 | No cerrar con cabos sueltos sin listarlos |
@@ -120,6 +121,14 @@ Cómo se trabaja con los agentes y el repositorio.
 - ⭐ Mensaje en formato: `tipo: descripción breve` (`feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `test:`).
 - ⭐⭐ **Convención de ramas:** `main` es la rama estable. Desarrollo en ramas `tipo/descripcion-corta` (ej. `feat/auth-jwt`, `fix/encoding-windows`, `refactor/voice-service`). No se pushea directo a `main` — siempre rama → merge. Tags de release en `main` (ej. `v0.1.0-fase1`).
 
+### Trazabilidad del trabajo (recomendado)
+
+Para que lo hecho en el repo sea **rastreable** más allá del código (qué cambió, en qué hito y con qué impacto):
+
+- ⭐⭐ **Commits como bitácora principal.** Mensajes claros en formato `tipo: descripción breve` (véase § Commits); cada commit debe permitir orientarse sin abrir el diff completo.
+- ⭐⭐ **CHANGELOG o `docs/historial/`.** Registrar **hitos**, **releases** y **breaking changes** en `CHANGELOG.md` (raíz del proyecto) o en notas bajo `docs/historial/` cuando no haya changelog único: un lugar donde un humano encuentre qué cambió de forma visible para usuarios o integradores.
+- ⭐⭐ **Planes para iniciativas grandes.** Mientras una iniciativa sea amplia (varias fases o varios servicios), mantener un `docs/PLAN_*.md` **activo** con cabecera de estado obligatoria (§ Planificación) y moverlo a `docs/historial/` al cerrar o archivar. Evita que solo el chat o commits dispersos cuenten la historia.
+
 ### Errores
 
 - ⭐⭐⭐ **Sin fallbacks silenciosos.** Si algo falla, el error debe ser visible: log, excepción, respuesta HTTP con código de error. Nunca tragarse un error con `except: pass` o devolver un valor por defecto sin avisar. _(🐛 origen: except:pass en text_flow del orchestrator y en monitoreo de fiscal)_
@@ -150,6 +159,14 @@ Cómo se trabaja con los agentes y el repositorio.
 
 - ⭐ **Adaptar la comunicación al nivel del usuario.** Si no entiende algo (término técnico, opciones), reformular en lenguaje más claro. Si indica que no entiende, simplificar sin que tenga que pedirlo dos veces.
 - ⭐⭐ **Si hay varias formas de hacer algo** (UX, flujo, criterios, diseño), preguntar cuál prefiere el usuario en lugar de elegir por él. No dar por hecho preferencias no expresadas.
+
+### Selección de modelo (asistente de código)
+
+En el IDE (p. ej. Cursor), elegir entre **modelo estándar vs avanzado** (ej. Sonnet / Opus) según la tarea. Los nombres comerciales pueden cambiar; la idea es estándar para lo rutinario y avanzado para lo exigente.
+
+- ⭐ **Tareas simples** — documentación, configs, formateo, commits, cambios acotados a un solo archivo: preferir **modelo estándar**.
+- ⭐ **Tareas complejas** — arquitectura, refactors que tocan varios archivos (p. ej. 3+), depuración con hardware real, planes con decisiones de diseño: preferir **modelo avanzado**.
+- ⭐ **En caso de duda**, empezar con modelo estándar. Si el agente se atasca, repite errores o el resultado es claramente pobre, pasar a modelo avanzado.
 
 ### No romper lo existente
 
@@ -352,6 +369,8 @@ Esto propaga los cambios a todos los proyectos del ecosistema.
 - **Planes activos:** `docs/PLAN_nombre.md` en la raíz de docs del proyecto.
 - **Planes completados u obsoletos:** `docs/historial/PLAN_nombre.md`.
 - **`.cursor/plans/`:** no se versiona (`.gitignore`). Si un plan de Cursor tiene valor, se copia manualmente a `docs/PLAN_nombre.md`.
+
+Relacionado con **trazabilidad:** los hitos que afecten a consumidores o versiones publicadas deben reflejarse también en `CHANGELOG.md` o en una entrada acotada bajo `docs/historial/` (ver § Trazabilidad del trabajo).
 
 ### Cabecera obligatoria de estado
 
