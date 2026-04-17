@@ -1,0 +1,2 @@
+# Rutas o archivos con patrones que parecen secretos pero son ejemplos, tests o datos sintéticos.
+# Formato: una ruta por línea (relativa a la raíz del repo). Ver https://github.com/gitleaks/gitleaks

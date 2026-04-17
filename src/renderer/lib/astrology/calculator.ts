@@ -1,4 +1,4 @@
-// Importar el módulo - Vite debería resolverlo correctamente con la configuración
+// El bundle publicado es CJS (solo exporta Origin y Horoscope; no hay default). Import nombrado funciona en Vite y en Node.
 import { Origin, Horoscope } from 'circular-natal-horoscope-js'
 import type { BirthData, PlanetPosition, ChartData, Aspect } from '../../types/astrology'
 

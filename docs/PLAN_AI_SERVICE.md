@@ -1,4 +1,4 @@
-> Estado: ACTIVO | Creado: 2026-03-26 | Última revisión: 2026-03-30
+> Estado: ACTIVO | Creado: 2026-03-26 | Última revisión: 2026-04-11
 
 # Plan: integración Carta Astral con ai-service
 
@@ -108,8 +108,8 @@ Al iniciar la app, el **proceso principal** (`src/main/main.ts`):
 | Config | `VITE_AI_SERVICE_URL` y `AI_SERVICE_URL` default `http://127.0.0.1:8100`; `SERVICES_ROOT`; `AUTO_START_AI_SERVICE` en `.env.example` y README |
 | Main | `ensureAiServiceRunning()` al `app.whenReady()` (no bloquea la UI); Windows: `start.bat` minimizado; Unix: `bash` + `start.sh` si `SERVICES_ROOT` está definido |
 | Cliente | `src/renderer/lib/ai/ai-service-client.ts`: `AbortSignal.timeout` o `AbortController`, `GET /health`, `POST /chat`, tipos alineados con FastAPI |
-| Contexto | Función pura `chartDataToPromptContext(chart)` solo con datos ya calculados |
-| UI | `ChartAiAssistant.tsx` en `ChartView` con `CollapsibleSection`, `aria-label`, resultado scrollable |
+| Contexto | `chartDataToPromptContext(chart)` y `transitsToPromptContext(transits, summary, energies)` solo con datos ya calculados |
+| UI | `ChartAiAssistant` en `ChartView`; `TransitAiAssistant` en `TodayDashboard` (`CollapsibleSection`, `aria-label`, resultado en `<details>`) |
 | Tests | Vitest con mocks que validen comportamiento real del cliente |
 | Ecosistema | `CARTA_ASTRAL.md` + `D:\services\scripts\claude-context\sync-services.ps1` |
 
@@ -121,11 +121,11 @@ Documentación de **qué hace hoy** el bloque IA, **dónde está cableado**, **d
 
 | Aspecto | Detalle |
 |---------|---------|
-| **Ubicación UI** | Solo en la vista de **una carta natal**: componente `ChartAiAssistant` dentro de [`ChartView.tsx`](../src/renderer/components/ChartView.tsx), visible en todos los modos de esa vista (detallada / gamificada / aspectos). |
-| **Entrada de datos** | Siempre se envía el contexto JSON generado por [`chartDataToPromptContext`](../src/renderer/lib/ai/chart-prompt-context.ts) a partir de `ChartData` (nacimiento, ascendente, MC, planetas, aspectos). |
+| **Ubicación UI** | Vista **carta natal**: [`ChartAiAssistant`](../src/renderer/components/Chart/ChartAiAssistant.tsx) en [`ChartView.tsx`](../src/renderer/components/ChartView.tsx). Vista **tránsitos del día**: [`TransitAiAssistant`](../src/renderer/components/Transits/TransitAiAssistant.tsx) en [`TodayDashboard.tsx`](../src/renderer/components/Transits/TodayDashboard.tsx), debajo de la guía práctica del día. |
+| **Entrada de datos** | Natal: JSON de [`chartDataToPromptContext`](../src/renderer/lib/ai/chart-prompt-context.ts) desde `ChartData`. Tránsitos: JSON de [`transitsToPromptContext`](../src/renderer/lib/ai/transit-prompt-context.ts) (tránsitos activos, resumen del día, energías, intensidad). |
 | **Sin pregunta opcional** | El mensaje de usuario pide explícitamente un **resumen divulgativo** coherente con esos datos (`requestChartSummary` en [`ai-service-client.ts`](../src/renderer/lib/ai/ai-service-client.ts)). |
 | **Con pregunta opcional** | Misma llamada `POST /chat`; el cuerpo incluye `Pregunta del usuario: …` para que el modelo responda **acotado a la carta** (no es un chat libre general). |
-| **System prompt** | Fijo en código (`AI_CHART_SYSTEM_PROMPT`): español, ceñirse al JSON (planetas con signo/casa exactos, aspectos solo del array, no mezclar cuerpos); refuerzo breve en el mensaje de usuario (`USER_CHART_VERIFICATION_TAIL`); sin médico/legal/financiero, sin certezas absolutas sobre personalidad/futuro. |
+| **System prompt** | Natal: `AI_CHART_SYSTEM_PROMPT`. Tránsitos: `AI_TRANSIT_SYSTEM_PROMPT` (astrólogo práctico, 3–4 frases, qué aprovechar/evitar; ceñirse al JSON). Refuerzos en el mensaje de usuario (`USER_CHART_VERIFICATION_TAIL` / `USER_TRANSIT_VERIFICATION_TAIL`). Sin médico/legal/financiero. |
 | **Backend** | Un único endpoint de app: **ai-service** `POST /chat` (y errores gestionados como en el plan). |
 
 ### Pantallas donde **no** hay asistente IA hoy
@@ -133,7 +133,7 @@ Documentación de **qué hace hoy** el bloque IA, **dónde está cableado**, **d
 | Vista en `App.tsx` | Componente principal | Notas |
 |--------------------|----------------------|--------|
 | `compare` | [`CompareView.tsx`](../src/renderer/components/CompareView.tsx) | Sin `ChartAiAssistant` ni llamadas a `ai-service`. |
-| `transits` | [`TodayDashboard`](../src/renderer/components/Transits/TodayDashboard.tsx) | Tránsitos del día / calendario; sin bloque IA. |
+| `transits` | [`TodayDashboard`](../src/renderer/components/Transits/TodayDashboard.tsx) | Tránsitos del día; **sí** bloque opcional `TransitAiAssistant` (resumen IA + caché `transit_ai_YYYY-MM-DD` en `sessionStorage`). |
 | `compatibility-matrix` | [`CompatibilityMatrix.tsx`](../src/renderer/components/CompatibilityMatrix.tsx) | Matriz numérica; sin IA. |
 | `transit-reminders` | [`TransitReminders.tsx`](../src/renderer/components/Transits/TransitReminders.tsx) | Recordatorios; sin IA. |
 | `home` | [`HomePage.tsx`](../src/renderer/components/HomePage.tsx) | Hub; sin contexto de una carta concreta en pantalla. |
@@ -148,7 +148,7 @@ Orden pensado para **alineación con la intención del usuario** (interpretar re
 | Prioridad | Pantalla | Por qué encaja | Matices |
 |-----------|----------|----------------|---------|
 | **Alta** | **Comparación de cartas** (`CompareView`) | Es donde se busca **significado de la relación** (sinastría), no solo tablas. IA útil: resumen de la dinámica entre dos mapas, tensiones/armonías, pregunta opcional (“¿dónde nos complementamos?”). | Hace falta **nuevo serializador de contexto** (dos `ChartData`, nombres, y opcionalmente aspectos intercartas si se exponen en esa vista). **No** reutilizar solo `chartDataToPromptContext` de una carta. |
-| **Alta** | **Tránsitos** (`TodayDashboard`) | Valor distinto al natal: **“qué hace esto hoy / esta semana”**. IA útil: resumen del día o respuesta sobre tránsitos listados. | El prompt debe incluir **tránsitos calculados** (fechas, orbes, planetas, etc.), no únicamente el JSON natal. Requiere función pura nueva que serialice lo que ya muestra el dashboard. |
+| **Alta** | **Tránsitos** (`TodayDashboard`) | Valor distinto al natal: **“qué hace esto hoy / esta semana”**. | **Hecho:** `transitsToPromptContext` + `TransitAiAssistant` + `requestTransitDaySummary`; caché por fecha en sesión. |
 | **Media** | **Matriz de compatibilidad** | Vista sobre todo **exploración numérica**; muchos usuarios pasan a **Comparar** para el detalle. | Un bloque IA “lectura general de la matriz” puede **solaparse** con IA en `CompareView`. Valorar **una sola** narrativa profunda (p. ej. solo comparación) antes de duplicar. |
 | **Media** | **Recordatorios de tránsitos** | Podría **priorizar o agrupar** en lenguaje natural una lista larga de eventos. | Menos imprescindible que el dashboard de “hoy”; depende del uso real de esa pantalla. |
 | **Baja** | **Home**, listados | Demasiado genérico; no hay un resultado astrológico único en foco. | Mejor mantener el asistente **por contexto concreto** (natal / pareja / momento). |
@@ -200,7 +200,7 @@ Abrir solo el monorepo **`D:\services`** para decidir **“dónde poner la IA”
 ## Fuera de alcance (fases futuras)
 
 - Auth hacia ai-service; historial multi-turno persistente; sustituir todas las interpretaciones por IA; logging-service (plan aparte: `docs/PLAN_LOGGING_SERVICE.md`).
-- **Extensiones de UI** valoradas en la sección *Asistente IA: alcance actual y otras pantallas* (comparación, tránsitos, etc.): documentadas aquí; **implementación pendiente** salvo el MVP en `ChartView`.
+- **Extensiones de UI** valoradas en la sección *Asistente IA: alcance actual y otras pantallas* (comparación, etc.): documentadas aquí; **implementación pendiente** salvo el MVP en `ChartView` y el resumen IA de tránsitos en `TodayDashboard`.
 
 ## Auditoría — reglas repo y Cursor (obligatoria antes de cerrar)
 

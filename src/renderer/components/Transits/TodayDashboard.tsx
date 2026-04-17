@@ -11,6 +11,7 @@ import BalanceIndicator from './BalanceIndicator'
 import ActivePlanetsPanel from './ActivePlanetsPanel'
 import PlanetGuide from './PlanetGuide'
 import DayGuidance from './DayGuidance'
+import TransitAiAssistant from './TransitAiAssistant'
 import TransitCalendar from './TransitCalendar'
 import TransitReminders from './TransitReminders'
 import CollapsibleSection from '../CollapsibleSection'
@@ -491,6 +492,15 @@ export default function TodayDashboard({ natalChart, personName, showCalendar, s
             }}
           />
         </CollapsibleSection>
+      )}
+
+      {currentTransits.length > 0 && (
+        <TransitAiAssistant
+          transits={currentTransits}
+          summary={currentSummary}
+          energies={dayEnergy}
+          cacheDateKey={getCacheKey(currentDate)}
+        />
       )}
 
       {/* Medidor de Energía del Día */}

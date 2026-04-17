@@ -1,4 +1,5 @@
 import type { TransitAspectType } from '../../types/astrology'
+import { everydaySupplement } from './interpretations-everyday'
 
 // Base de datos de interpretaciones básicas
 // Formato: "transitingPlanet_aspect_natalPoint"
@@ -120,20 +121,40 @@ export function getInterpretation(
 ): string {
   const key = `${transitingPlanet}_${aspect}_${natalPoint}`
   
-  // Intentar con el nombre exacto
+   // Intentar con el nombre exacto
   if (INTERPRETATIONS[key]) {
-    return INTERPRETATIONS[key]
+    return interpretationWithEveryday(
+      transitingPlanet,
+      aspect,
+      natalPoint,
+      INTERPRETATIONS[key],
+    )
   }
-  
+
   // Fallback: interpretación genérica basada en aspecto
   const aspectMeanings: Record<TransitAspectType, string> = {
     conjunction: 'Fusión de energías. Influencia directa y potente.',
     sextile: 'Oportunidad armónica. Flujo positivo de energía.',
     square: 'Desafío y tensión. Necesitas acción y resolución.',
     trine: 'Armonía y flujo. Energía positiva y facilitadora.',
-    opposition: 'Tensión y polaridad. Necesitas equilibrio y diálogo.'
+    opposition: 'Tensión y polaridad. Necesitas equilibrio y diálogo.',
   }
-  
-  return `${transitingPlanet} ${aspectMeanings[aspect]} sobre tu ${natalPoint} natal.`
+
+  const generic = `${transitingPlanet} ${aspectMeanings[aspect]} sobre tu ${natalPoint} natal.`
+  return interpretationWithEveryday(transitingPlanet, aspect, natalPoint, generic)
+}
+
+function interpretationWithEveryday(
+  transitingPlanet: string,
+  aspect: TransitAspectType,
+  natalPoint: string,
+  mainText: string,
+): string {
+  const base = mainText.trim()
+  const low = base.toLowerCase()
+  if (low.includes('día a día') || low.includes('dia a dia')) {
+    return base
+  }
+  return `${base}${everydaySupplement(transitingPlanet, aspect, natalPoint)}`
 }
 

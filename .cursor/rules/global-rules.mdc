@@ -19,13 +19,13 @@ Aplican a **todos** los proyectos del ecosistema (`D:\services\`, `D:\projects\`
 > Las reglas con origen en bugs reales detectados en el ecosistema son automáticamente ⭐⭐⭐.
 > Las que afectan seguridad o pérdida de datos son ⭐⭐⭐.
 
-**Resumen: 20 ⭐⭐⭐ (29%) · 29 ⭐⭐ (41%) · 21 ⭐ (30%) · 12 con 🐛 origen documentado**
+**Resumen: 22 ⭐⭐⭐ (29%) · 34 ⭐⭐ (45%) · 18 ⭐ (24%) · 14 con 🐛 origen documentado**
 
 ---
 
 ## Índice de reglas por sector
 
-> **Total: 70 reglas** en 6 sectores + comunicación de resultados (12 marcadas con 🐛 — nacidas de bugs reales). Última actualización: 2026-04-10.
+> **Total: 75 reglas** en 6 sectores + comunicación de resultados (14 marcadas con 🐛 — nacidas de bugs reales). Última actualización: 2026-04-17.
 > Tras 11 fusiones de reglas duplicadas/solapadas, se eliminaron 16 bullets sin perder conceptos.
 >
 > **Alcance:** Las reglas de Python, TypeScript, API REST y UX aplican solo a proyectos con ese stack. Los servicios backend puros sin UI omiten las reglas de UX. El resto son globales sin excepción.
@@ -78,16 +78,15 @@ Experiencia de usuario y diseño de interfaces.
 |---------|--------|-----------|
 | UX — Diseño de interfaces | 6 | Seleccionable (no texto), TDAH-friendly, listas sobre párrafos, accesibilidad, estados carga/error, responsive |
 
-### 6. Proceso de trabajo (13 reglas)
+### 6. Proceso de trabajo (18 reglas)
 
 Cómo se trabaja con los agentes y el repositorio.
 
 | Sección | Reglas | Qué cubre |
 |---------|--------|-----------|
-| Commits y git | 4 | No --no-verify, un commit = una cosa, formato, ramas |
-| Trazabilidad | 3 | Bitácora en Git, CHANGELOG/historial, planes activos hasta cerrar |
-| Validar antes de implementar | 2 | Checklist pre-implementación (5 puntos), cuándo omitir |
-| Comunicación IA-usuario | 2 | Adaptar al nivel del usuario, preguntar preferencias |
+| Commits y git | 10 | No --no-verify, un commit = una cosa, cierre por tarea, no acumular WIP, push fin de sesión, status inicio/fin, ramas efímeras ≤7 días, revisión tras agentes, formato, ramas, paridad CI/pre-push en services |
+| Validar antes de implementar | 3 | Checklist pre-implementación (5 puntos), gate de lectura + sugerencias, cuándo omitir |
+| Comunicación IA-usuario | 3 | Adaptar al nivel del usuario, preguntar preferencias, resumen «Carlos» en una línea |
 | Pendientes explícitos | 1 | No cerrar con cabos sueltos sin listarlos |
 | Reglas nacidas de bugs reales | 1 | Bug recurrente → regla nueva con 🐛, protegida contra eliminación |
 
@@ -120,14 +119,12 @@ Cómo se trabaja con los agentes y el repositorio.
 - ⭐ **Un commit = una cosa.** Un fix, un feature, un refactor. Si necesitas "y" para describir el commit, son dos commits.
 - ⭐ Mensaje en formato: `tipo: descripción breve` (`feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `test:`).
 - ⭐⭐ **Convención de ramas:** `main` es la rama estable. Desarrollo en ramas `tipo/descripcion-corta` (ej. `feat/auth-jwt`, `fix/encoding-windows`, `refactor/voice-service`). No se pushea directo a `main` — siempre rama → merge. Tags de release en `main` (ej. `v0.1.0-fase1`).
-
-### Trazabilidad del trabajo (recomendado)
-
-Para que lo hecho en el repo sea **rastreable** más allá del código (qué cambió, en qué hito y con qué impacto):
-
-- ⭐⭐ **Commits como bitácora principal.** Mensajes claros en formato `tipo: descripción breve` (véase § Commits); cada commit debe permitir orientarse sin abrir el diff completo.
-- ⭐⭐ **CHANGELOG o `docs/historial/`.** Registrar **hitos**, **releases** y **breaking changes** en `CHANGELOG.md` (raíz del proyecto) o en notas bajo `docs/historial/` cuando no haya changelog único: un lugar donde un humano encuentre qué cambió de forma visible para usuarios o integradores.
-- ⭐⭐ **Planes para iniciativas grandes.** Mientras una iniciativa sea amplia (varias fases o varios servicios), mantener un `docs/PLAN_*.md` **activo** con cabecera de estado obligatoria (§ Planificación) y moverlo a `docs/historial/` al cerrar o archivar. Evita que solo el chat o commits dispersos cuenten la historia.
+- ⭐⭐ **En `D:\services\`, paridad con CI antes de publicar cambios:** seguir **`docs/CI_BASE_ECOSISTEMA.md`** y **`docs/ENTORNO_PYTHON.md`** (§ pre-push): instalar hooks `pre-commit` y **`pre-push`** desde la raíz del repo; el push debe pasar la misma lógica que allí se describe (p. ej. matriz pytest + Vitest del dashboard). Sin hooks instalados, equivalente manual con **`scripts/testing/run-pytest-pre-push.py`** y el flujo Vitest descrito en esa doc. Otros proyectos del ecosistema: su propio workflow / `CI_BASE` del repo.
+- ⭐⭐⭐ **Commit al terminar cada tarea cerrada.** No acumular 10 tareas sin commitear. Una tarea = un commit (o varios si son cambios coherentes separados). Nunca dejar una sesión con 50+ archivos modificados sin commitear. _(🐛 origen: sesión con 42 commits locales + 100+ archivos sin commit tras un día de trabajo con agentes)_
+- ⭐⭐⭐ **Push al cerrar sesión de trabajo.** Antes de apagar el PC o cerrar el IDE, hacer `git push` de todos los commits locales. Evitar acumular commits *ahead* de `origin` que puedan perderse si falla el disco o se necesita trabajar desde otra máquina.
+- ⭐⭐ **Revisar `git status` al inicio y final de sesión.** Al empezar: saber qué quedó pendiente. Al terminar: confirmar que todo está commiteado y pusheado.
+- ⭐⭐ **Ramas efímeras se cierran o mergean en máximo 7 días.** Si una rama lleva más de una semana sin merge o actualización desde el tronco, decidir: merge a `main`/`master` o eliminar. Ramas abandonadas acumulan deuda y divergen del tronco. _(🐛 origen: ramas `chore/ci-github-actions` en services y SALUD abandonadas con commits sin merge)_
+- ⭐⭐ **Después de trabajar con agentes de Cursor, revisar `git status` antes de pasar a otro tema.** Los agentes pueden dejar archivos modificados o nuevos que no recuerdas. Confirmar qué hizo el agente antes de seguir.
 
 ### Errores
 
@@ -153,12 +150,14 @@ Para que lo hecho en el repo sea **rastreable** más allá del código (qué cam
   - Riesgos de regresión (tests afectados, rutas críticas, integraciones externas)
   - Orden de implementación si hay varios pasos (ej. backend → contrato → frontend → tests)
   - Dudas → preguntar antes de tocar código si la spec no es suficiente
+- ⭐⭐ **Gate de lectura antes de codificar (tareas no triviales):** Al pedir implementación, comprobar si ya está **todo lo necesario** resuelto (decisión de diseño, plan/contrato alineado con código, migraciones, entorno, criterios de aceptación). Si falta algo o hay **opciones equiparables**, **no asumir en silencio**: en el mismo turno, resumir qué está claro, qué falta y **preguntar** o proponer la opción recomendada con breve motivo. Ofrecer **sugerencias de mejora** cuando aporten (riesgo, coherencia con `docs/`, deuda, tests) — breves, no un informe. En tareas triviales (typo, rename local, ajuste de formato) no aplica el ritual completo.
 - ⭐ Solo se omite si el usuario dice explícitamente "implementa directamente sin validar".
 
 ### Comunicación IA-usuario
 
 - ⭐ **Adaptar la comunicación al nivel del usuario.** Si no entiende algo (término técnico, opciones), reformular en lenguaje más claro. Si indica que no entiende, simplificar sin que tenga que pedirlo dos veces.
 - ⭐⭐ **Si hay varias formas de hacer algo** (UX, flujo, criterios, diseño), preguntar cuál prefiere el usuario en lugar de elegir por él. No dar por hecho preferencias no expresadas.
+- ⭐⭐ **«Respuesta para Carlos» — resumen en una línea primero.** Si el usuario pide explícitamente una **respuesta para Carlos** (u otra fórmula clara con el mismo sentido: p. ej. «solo una línea», «resumen ultra breve para Carlos»), **empezar** la respuesta con **una sola línea** clara y concisa con lo esencial; solo después, si sigue siendo útil, añadir detalle en **listas muy cortas** o bloques breves — evitar muros de párrafo. _(Motivo: TDAH / no perderse en demasiado texto.)_
 
 ### Selección de modelo (asistente de código)
 
@@ -370,15 +369,25 @@ Esto propaga los cambios a todos los proyectos del ecosistema.
 - **Planes completados u obsoletos:** `docs/historial/PLAN_nombre.md`.
 - **`.cursor/plans/`:** no se versiona (`.gitignore`). Si un plan de Cursor tiene valor, se copia manualmente a `docs/PLAN_nombre.md`.
 
-Relacionado con **trazabilidad:** los hitos que afecten a consumidores o versiones publicadas deben reflejarse también en `CHANGELOG.md` o en una entrada acotada bajo `docs/historial/` (ver § Trazabilidad del trabajo).
-
 ### Cabecera obligatoria de estado
 
 Todo plan activo debe empezar con esta línea (blockquote):
 
 ```
 > Estado: ACTIVO | Creado: YYYY-MM-DD | Última revisión: YYYY-MM-DD
+> Validado por Carlos: [ ]
 ```
+
+La línea de validación va **justo después** de la cabecera de estado:
+
+```
+> Estado: ACTIVO | Creado: YYYY-MM-DD | Última revisión: YYYY-MM-DD
+> Validado por Carlos: [ ]
+```
+
+- Cuando Carlos valide el plan tras revisarlo, la casilla pasa a `[x]`.
+- Si un plan tiene `[ ]` → Carlos aún no lo ha aprobado, **no implementar**.
+- Si un plan tiene `[x]` → Carlos dio OK explícito, se puede avanzar.
 
 - El agente actualiza "Última revisión" cada vez que modifica el plan.
 - Si un plan lleva más de 30 días sin revisión → mover a `docs/historial/` o actualizar con fecha nueva.
@@ -389,10 +398,21 @@ Todo plan activo debe empezar con esta línea (blockquote):
 Todo archivo `PLAN_*.md` debe contener estas secciones:
 
 1. **Cabecera de estado** — Línea `> Estado: ACTIVO | Creado: ... | Última revisión: ...`
-2. **Objetivo** — Qué se quiere conseguir (1-2 frases).
-3. **Tareas** — Tabla con: tarea, prioridad (alta/media/baja), esfuerzo estimado (bajo/medio/alto), dependencias.
-4. **Riesgos y regresiones** — Qué puede salir mal, qué se puede romper.
-5. **Aprobación** — Pedir OK explícito del usuario antes de implementar.
+2. **Validado por Carlos (casilla)** — Línea `> Validado por Carlos: [ ]` o `> Validado por Carlos: [x]`.
+3. **Objetivo** — Qué se quiere conseguir (1-2 frases).
+4. **Tareas** — Tabla con: tarea, prioridad (alta/media/baja), esfuerzo estimado (bajo/medio/alto), dependencias.
+5. **Riesgos y regresiones** — Qué puede salir mal, qué se puede romper.
+6. **Aprobación** — Pedir OK explícito del usuario antes de implementar.
+
+| Elemento | Obligatorio |
+|----------|-------------|
+| Cabecera Estado | Sí |
+| Validado por Carlos (casilla) | Sí |
+| Objetivo | Sí |
+| Tareas | Sí |
+| Riesgos y regresiones | Sí |
+| Aprobación | Sí |
+| Referencias | Opcional |
 
 Opcional:
 - **Referencias** — Links a ROADMAP.md, PENDIENTES.md, ECOSYSTEM.md cuando aplique.
@@ -413,4 +433,4 @@ Opcional:
 
 ---
 
-> **IMPORTANTE:** Si modificas REGLAS_DESARROLLO.md, recuerda ejecutar D:\services\scripts\sync-global-rules.ps1 para propagar los cambios a todos los proyectos.
+> **IMPORTANTE:** Si modificas REGLAS_DESARROLLO.md, recuerda ejecutar `D:\services\scripts\sync-global-rules.ps1` para propagar los cambios a todos los proyectos.

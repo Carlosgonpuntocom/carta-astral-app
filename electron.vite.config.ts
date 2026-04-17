@@ -4,7 +4,16 @@ import path from 'path'
 
 export default defineConfig({
   main: {
-    plugins: [externalizeDepsPlugin()]
+    plugins: [externalizeDepsPlugin()],
+    resolve: {
+      alias: {
+        // Misma resolución que el renderer para que calculator/transits funcionen en el proceso main
+        'circular-natal-horoscope-js': path.resolve(
+          __dirname,
+          './node_modules/circular-natal-horoscope-js/dist/index.js'
+        )
+      }
+    }
   },
   preload: {
     plugins: [externalizeDepsPlugin()],

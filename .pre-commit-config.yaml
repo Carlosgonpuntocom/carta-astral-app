@@ -1,0 +1,6 @@
+# Secret scanning — alineado con docs/CI_BASE_ECOSISTEMA.md (ecosistema D:\services).
+repos:
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.24.0
+    hooks:
+      - id: gitleaks

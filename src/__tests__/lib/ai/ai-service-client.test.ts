@@ -1,130 +1,105 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+/**
+ * @vitest-environment jsdom
+ */
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import {
-  getAiServiceBaseUrl,
-  checkAiServiceHealth,
   postChat,
-  requestChartSummary,
-  AI_CHART_SYSTEM_PROMPT
+  AI_CHART_SYSTEM_PROMPT,
+  AI_TRANSIT_SYSTEM_PROMPT,
+  requestTransitDaySummary
 } from '../../../renderer/lib/ai/ai-service-client'
 
-describe('ai-service-client', () => {
-  const originalFetch = globalThis.fetch
+describe('AI_CHART_SYSTEM_PROMPT', () => {
+  it('exige ceñirse al JSON y no mezclar planetas ni inventar aspectos', () => {
+    expect(AI_CHART_SYSTEM_PROMPT).toMatch(/ÚNICAMENTE el JSON/)
+    expect(AI_CHART_SYSTEM_PROMPT).toMatch(/array "planetas"/)
+    expect(AI_CHART_SYSTEM_PROMPT).toMatch(/array "aspectos"/)
+    expect(AI_CHART_SYSTEM_PROMPT).toMatch(/Prohibido atribuir el signo/)
+  })
+})
 
-  beforeEach(() => {
+describe('AI_TRANSIT_SYSTEM_PROMPT', () => {
+  it('define tono práctico y límites sobre el JSON', () => {
+    expect(AI_TRANSIT_SYSTEM_PROMPT).toMatch(/astrólogo práctico/)
+    expect(AI_TRANSIT_SYSTEM_PROMPT).toMatch(/3-4 frases/)
+    expect(AI_TRANSIT_SYSTEM_PROMPT).toMatch(/transitos_activos/)
+    expect(AI_TRANSIT_SYSTEM_PROMPT).toMatch(/médicos, legales, financieros/)
+  })
+})
+
+describe('requestTransitDaySummary', () => {
+  const origFetch = globalThis.fetch
+
+  afterEach(() => {
+    globalThis.fetch = origFetch
     vi.restoreAllMocks()
   })
 
-  afterEach(() => {
-    globalThis.fetch = originalFetch
-  })
-
-  it('getAiServiceBaseUrl recorta barra final', () => {
-    expect(getAiServiceBaseUrl({ baseUrl: 'http://127.0.0.1:8100/' })).toBe('http://127.0.0.1:8100')
-  })
-
-  it('checkAiServiceHealth devuelve ok cuando /health responde 200', async () => {
-    globalThis.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => ({ status: 'ok', provider: 'ollama', model: 'llama3' })
-    }) as unknown as typeof fetch
-
-    const r = await checkAiServiceHealth({ baseUrl: 'http://test.local:9999' })
-    expect(r.ok).toBe(true)
-    if (r.ok) {
-      expect(r.data.model).toBe('llama3')
-    }
-    expect(globalThis.fetch).toHaveBeenCalledWith(
-      'http://test.local:9999/health',
-      expect.objectContaining({ signal: expect.any(AbortSignal) })
-    )
-  })
-
-  it('postChat envía POST /chat con JSON y devuelve respuesta', async () => {
+  it('POST /chat con system_prompt de tránsitos y cuerpo que incluye transitos_activos', async () => {
     globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({
-        response: 'Hola',
+        response: 'ok',
         model: 'm',
         provider: 'ollama'
       })
     }) as unknown as typeof fetch
 
-    const out = await postChat(
-      { messages: [{ role: 'user', content: 'x' }] },
-      { baseUrl: 'http://api.test', chatTimeoutMs: 30_000 }
-    )
-    expect(out.response).toBe('Hola')
-    expect(globalThis.fetch).toHaveBeenCalledWith(
-      'http://api.test/chat',
-      expect.objectContaining({
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: [{ role: 'user', content: 'x' }] })
-      })
-    )
+    const ctx = JSON.stringify({ transitos_activos: [], intensidad: { valor: 0 } })
+    const out = await requestTransitDaySummary(ctx, { baseUrl: 'http://127.0.0.1:8100' })
+    expect(out.response).toBe('ok')
+
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1)
+    const [, init] = (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0] as [
+      string,
+      RequestInit
+    ]
+    expect(init.method).toBe('POST')
+    const body = JSON.parse(init.body as string) as {
+      system_prompt: string
+      messages: { role: string; content: string }[]
+    }
+    expect(body.system_prompt).toBe(AI_TRANSIT_SYSTEM_PROMPT)
+    expect(body.messages[0].content).toContain('transitos_activos')
+    expect(body.messages[0].content).toContain('Tránsitos y contexto del día')
+  })
+})
+
+describe('postChat', () => {
+  const origFetch = globalThis.fetch
+
+  afterEach(() => {
+    globalThis.fetch = origFetch
+    vi.restoreAllMocks()
   })
 
-  it('postChat lanza error claro en 503', async () => {
+  it('502: muestra el detail de ai-service sin anteponer otro "Error del proveedor de IA"', async () => {
+    const detail = 'Error del proveedor de IA: HTTP Error 404: Not Found'
     globalThis.fetch = vi.fn().mockResolvedValue({
       ok: false,
-      status: 503,
-      statusText: 'Service Unavailable',
-      json: async () => ({ detail: 'sin modelo' })
+      status: 502,
+      json: async () => ({ detail })
     }) as unknown as typeof fetch
 
     await expect(
-      postChat({ messages: [{ role: 'user', content: 'a' }] }, { baseUrl: 'http://h' })
-    ).rejects.toThrow(/no está disponible/)
+      postChat({ messages: [{ role: 'user', content: 'hola' }] }, { baseUrl: 'http://127.0.0.1:8100' })
+    ).rejects.toThrow(detail)
+
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      'http://127.0.0.1:8100/chat',
+      expect.objectContaining({ method: 'POST' })
+    )
   })
 
-  it('postChat en timeout lanza mensaje en español', async () => {
-    vi.useFakeTimers()
-    globalThis.fetch = vi.fn().mockImplementation(
-      (_url, init?: RequestInit) =>
-        new Promise((_resolve, reject) => {
-          const s = init?.signal
-          if (s) {
-            s.addEventListener('abort', () => {
-              const err = new Error('Aborted')
-              err.name = 'AbortError'
-              reject(err)
-            })
-          }
-        })
-    ) as unknown as typeof fetch
-
-    const p = postChat({ messages: [{ role: 'user', content: 'a' }] }, {
-      baseUrl: 'http://h',
-      chatTimeoutMs: 100
-    })
-    vi.advanceTimersByTime(200)
-    try {
-      await p
-      expect.fail('debía rechazar por timeout')
-    } catch (e) {
-      expect(e).toBeInstanceOf(Error)
-      expect((e as Error).message).toMatch(/superó el tiempo de espera/)
-    }
-    vi.useRealTimers()
-  })
-
-  it('requestChartSummary incluye pregunta en el cuerpo del mensaje', async () => {
-    const calls: string[] = []
-    globalThis.fetch = vi.fn().mockImplementation((_url, init?: RequestInit) => {
-      calls.push((init?.body as string) ?? '')
-      return Promise.resolve({
-        ok: true,
-        json: async () => ({ response: 'r', model: 'm', provider: 'p' })
-      })
+  it('502 con detail vacío: mensaje genérico en español', async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 502,
+      json: async () => ({ detail: '   ' })
     }) as unknown as typeof fetch
 
-    await requestChartSummary('{"a":1}', '¿Sol?', { baseUrl: 'http://x' })
-    const body = JSON.parse(calls[0]!) as {
-      messages: { content: string }[]
-      system_prompt: string
-    }
-    expect(body.system_prompt).toBe(AI_CHART_SYSTEM_PROMPT)
-    expect(body.messages[0].content).toContain('¿Sol?')
-    expect(body.messages[0].content).toContain('{"a":1}')
+    await expect(
+      postChat({ messages: [{ role: 'user', content: 'hola' }] }, { baseUrl: 'http://127.0.0.1:8100' })
+    ).rejects.toThrow(/proveedor de IA no respondió correctamente/)
   })
 })

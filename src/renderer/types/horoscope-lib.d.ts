@@ -30,5 +30,14 @@ declare module 'circular-natal-horoscope-js' {
     Houses: HouseData[]
     Aspects?: any
   }
+
+  /** Instancia de carta calculada (natal o tránsito). */
+  export class Horoscope {
+    constructor(options: Record<string, unknown>)
+    CelestialBodies: { all?: unknown[] }
+    Ascendant?: { ChartPosition?: { Ecliptic?: { DecimalDegrees?: number } } }
+    Midheaven?: { ChartPosition?: { Ecliptic?: { DecimalDegrees?: number } } }
+    [key: string]: unknown
+  }
 }
 

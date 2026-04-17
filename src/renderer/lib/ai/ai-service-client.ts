@@ -10,12 +10,25 @@ const DEFAULT_CHAT_TIMEOUT_MS = 55_000
 const DEFAULT_HEALTH_TIMEOUT_MS = 8_000
 
 /** Instrucciones fijas; el modelo solo elabora sobre el contexto numérico. */
-export const AI_CHART_SYSTEM_PROMPT = `Eres un asistente de astrología natal occidental en español, tono divulgativo y respetuoso.
+/** Resumen del día a partir de tránsitos ya calculados (TodayDashboard). */
+export const AI_TRANSIT_SYSTEM_PROMPT = `Eres un astrólogo práctico. Genera resumen breve (3-4 frases) del día. Tono: directo, útil. Qué aprovechar y qué evitar.
+
 Reglas obligatorias:
-- Basa el texto únicamente en los datos JSON que recibas del usuario. No inventes posiciones, signos ni grados.
-- Si faltan datos, dilo con claridad en lugar de suponer.
+- Usa ÚNICAMENTE el JSON del usuario (transitos_activos, resumen_dia, energias_del_dia, intensidad). No inventes planetas, aspectos ni cifras que no aparezcan ahí.
 - No des consejos médicos, legales, financieros ni de seguridad.
-- No afirmes certezas absolutas sobre la personalidad o el futuro; habla en términos de tendencias simbólicas propias de la astrología.
+- No afirmes certezas absolutas sobre el futuro; habla en términos de tendencias simbólicas del día.
+- Responde siempre en español.`
+
+export const AI_CHART_SYSTEM_PROMPT = `Eres un asistente de astrología natal occidental en español, tono divulgativo y respetuoso.
+
+Reglas obligatorias (máxima prioridad):
+- Usa ÚNICAMENTE el JSON del usuario: claves nacimiento, ascendente, medio_cielo, planetas, aspectos. No inventes cuerpos, signos, grados ni casas que no aparezcan ahí.
+- Por cada planeta o punto que menciones, el signo y la casa deben coincidir exactamente con su entrada en el array "planetas" (campos signo y casa; si no hay casa, di que no viene en los datos). Prohibido atribuir el signo de un cuerpo a otro o agrupar dos planetas en un mismo signo salvo que el JSON muestre ese signo para cada uno.
+- ascendente y medio_cielo son ángulos del JSON: úsalos solo con esos valores, no los confundas con planetas.
+- Aspectos: comenta solo combinaciones que existan en el array "aspectos" (entre, tipo, orbe). No inventes aspectos ni añadas un tercer cuerpo a un aspecto que en el JSON solo une dos.
+- Si falta información en el JSON, dilo; no rellenes por suposición.
+- No des consejos médicos, legales, financieros ni de seguridad.
+- No afirmes certezas absolutas sobre personalidad o futuro; habla en términos de tendencias simbólicas.
 - Responde siempre en español.`
 
 function resolveBaseUrl(options?: AiServiceClientOptions): string {
@@ -90,12 +103,17 @@ export async function postChat(
     })
     if (!res.ok) {
       const detail = await readErrorDetail(res)
+      // 502: ai-service ya incluye "Error del proveedor de IA: …" en detail — no duplicar prefijo
+      if (res.status === 502) {
+        throw new Error(
+          detail.trim() ||
+            'El proveedor de IA no respondió correctamente (502). Comprueba Ollama y OLLAMA_MODEL en ai-service.'
+        )
+      }
       throw new Error(
         res.status === 503
           ? `El servicio de IA no está disponible: ${detail}. Arranca ai-service y el proveedor (p. ej. Ollama) en D:\\services.`
-          : res.status === 502
-            ? `Error del proveedor de IA: ${detail}`
-            : `Error al hablar con ai-service (${res.status}): ${detail}`
+          : `Error al hablar con ai-service (${res.status}): ${detail}`
       )
     }
     return (await res.json()) as ChatResponse
@@ -116,19 +134,42 @@ export async function postChat(
   }
 }
 
+/** Recordatorio en el mensaje de usuario (refuerzo del system prompt). */
+const USER_CHART_VERIFICATION_TAIL =
+  '\n\nAntes de redactar: contrasta cada afirmación sobre planetas o ángulos con los campos del JSON; no atribuyas el signo de un cuerpo a otro. Los aspectos solo si constan en "aspectos".'
+
 export async function requestChartSummary(
   chartContextText: string,
   userQuestion: string | undefined,
   options?: AiServiceClientOptions
 ): Promise<ChatResponse> {
+  const block = `Datos de la carta (JSON):\n${chartContextText}${USER_CHART_VERIFICATION_TAIL}`
   const userContent = userQuestion?.trim()
-    ? `Datos de la carta (JSON):\n${chartContextText}\n\nPregunta del usuario: ${userQuestion.trim()}`
-    : `Datos de la carta (JSON):\n${chartContextText}\n\nGenera un resumen divulgativo coherente con esos datos.`
+    ? `${block}\n\nPregunta del usuario: ${userQuestion.trim()}`
+    : `${block}\n\nGenera un resumen divulgativo coherente con esos datos.`
 
   return postChat(
     {
       messages: [{ role: 'user', content: userContent }],
       system_prompt: AI_CHART_SYSTEM_PROMPT
+    },
+    options
+  )
+}
+
+const USER_TRANSIT_VERIFICATION_TAIL =
+  '\n\nAntes de redactar: contrasta cada tránsito mencionado con el array "transitos_activos"; no atribuyas aspectos o planetas que no consten en el JSON.'
+
+export async function requestTransitDaySummary(
+  transitContextText: string,
+  options?: AiServiceClientOptions
+): Promise<ChatResponse> {
+  const userContent = `Tránsitos y contexto del día (JSON):\n${transitContextText}${USER_TRANSIT_VERIFICATION_TAIL}\n\nRedacta el resumen breve pedido en el system prompt.`
+
+  return postChat(
+    {
+      messages: [{ role: 'user', content: userContent }],
+      system_prompt: AI_TRANSIT_SYSTEM_PROMPT
     },
     options
   )

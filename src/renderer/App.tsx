@@ -323,7 +323,6 @@ export default function App() {
             onViewPersonTransits={handleViewTransits}
             onViewCompatibilityMatrix={() => setCurrentView('compatibility-matrix')}
             onViewTransitReminders={() => setCurrentView('transit-reminders')}
-            onViewDemo={handleViewDemo}
           />
         )}
 

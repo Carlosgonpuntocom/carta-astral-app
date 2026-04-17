@@ -124,7 +124,7 @@ carta-astral-app/
 Si quieres usar **Generar resumen con IA** en la vista de carta:
 
 1. **Al abrir la app** (proceso principal de Electron), si `GET /health` en el puerto **8100** falla, se intenta arrancar **`D:\services\ai-service\start.bat`** en una ventana minimizada (Windows). En macOS/Linux hace falta definir **`SERVICES_ROOT`** con la ruta al monorepo `services` y existirá `ai-service/start.sh`. Desactivar: **`AUTO_START_AI_SERVICE=0`** en el entorno o en `.env` (ver `.env.example`).
-2. Asegúrate de que el **proveedor** (p. ej. Ollama) esté activo con el modelo configurado en ai-service; la primera vez ai-service puede crear `.env` desde `.env.example` y pedirte editarlo.
+2. Asegúrate de que el **proveedor** (p. ej. Ollama) esté activo con el modelo configurado en ai-service; la primera vez ai-service puede crear `.env` desde `.env.example` y pedirte editarlo. Los modelos los descarga **Ollama** en tu PC (no vienen “dentro” de ai-service). Para ver **qué modelos ya tienes:** `ollama list` en terminal, o con ai-service arrancado `GET http://127.0.0.1:8100/models`. **Dónde están en disco** (Windows/macOS/Linux) y `OLLAMA_MODELS`: `D:\services\docs\services\ai-service.md` (sección **Ollama en tu PC**).
 3. Por defecto la URL es `http://127.0.0.1:8100`. Para cambiarla, copia `.env.example` a `.env` y ajusta **`VITE_AI_SERVICE_URL`** (renderer) y, si aplica, **`AI_SERVICE_URL`** (comprobación / auto-arranque en el main).
 4. Vuelve a ejecutar `npm run dev` tras modificar `.env`.
 

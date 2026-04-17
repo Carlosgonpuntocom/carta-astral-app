@@ -1,7 +1,12 @@
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { loadLocalEnv } from './load-local-env'
+import { app, BrowserWindow, ipcMain, Menu, type MenuItemConstructorOptions } from 'electron'
 import path from 'path'
 import fs from 'fs'
 import { promisify } from 'util'
+import { ensureAiServiceRunning } from './ensure-ai-service'
+import { startApiServer } from './api/server'
+
+loadLocalEnv()
 
 // Convertir funciones de fs a promesas
 const readFile = promisify(fs.readFile)
@@ -56,11 +61,41 @@ async function ensureDir(dirPath: string): Promise<void> {
   }
 }
 
+/** Menú mínimo en desarrollo: sin esto, en algunos equipos no aparece barra ni atajos para DevTools. */
+function setDevelopmentMenu(mainWindow: BrowserWindow): void {
+  const template: MenuItemConstructorOptions[] = [
+    {
+      label: 'Ver',
+      submenu: [
+        {
+          label: 'Recargar',
+          accelerator: 'F5',
+          click: () => mainWindow.reload()
+        },
+        {
+          label: 'Consola / DevTools',
+          accelerator: process.platform === 'darwin' ? 'Alt+Command+I' : 'Ctrl+Shift+I',
+          click: () => {
+            if (mainWindow.webContents.isDevToolsOpened()) {
+              mainWindow.webContents.closeDevTools()
+            } else {
+              mainWindow.webContents.openDevTools({ mode: 'detach' })
+            }
+          }
+        }
+      ]
+    }
+  ]
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template))
+  mainWindow.setMenuBarVisibility(true)
+}
+
 // Función para crear la ventana principal
 function createWindow() {
   const mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
+    autoHideMenuBar: false,
     webPreferences: {
       preload: path.join(__dirname, '../preload/preload.cjs'),
       nodeIntegration: false,
@@ -68,10 +103,17 @@ function createWindow() {
     }
   })
 
-  // En desarrollo, cargar desde Vite dev server
-  if (process.env.NODE_ENV === 'development') {
-    mainWindow.loadURL('http://localhost:5173')
-    mainWindow.webContents.openDevTools()
+  // Desarrollo: URL real del dev server (electron-vite inyecta ELECTRON_RENDERER_URL; si 5173 está ocupado, el puerto cambia).
+  const devRendererUrl = process.env.ELECTRON_RENDERER_URL
+  if (devRendererUrl) {
+    setDevelopmentMenu(mainWindow)
+    mainWindow.webContents.on('did-fail-load', (_e, code, desc, url) => {
+      console.error('[main] did-fail-load', { code, desc, url })
+    })
+    void mainWindow.loadURL(devRendererUrl).then(() => {
+      // Ventana aparte: más fácil de ver que el panel acoplado si la página falla o está en blanco.
+      mainWindow.webContents.openDevTools({ mode: 'detach' })
+    })
   } else {
     // En producción, cargar archivo local desde src/renderer
     mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'))
@@ -134,7 +176,9 @@ ipcMain.handle('save-people', async (_event, people: any) => {
 
 // Cuando Electron está listo, crear la ventana
 app.whenReady().then(() => {
+  void ensureAiServiceRunning()
   createWindow()
+  startApiServer()
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
