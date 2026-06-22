@@ -19,13 +19,13 @@ Aplican a **todos** los proyectos del ecosistema (`D:\services\`, `D:\projects\`
 > Las reglas con origen en bugs reales detectados en el ecosistema son automáticamente ⭐⭐⭐.
 > Las que afectan seguridad o pérdida de datos son ⭐⭐⭐.
 
-**Resumen: 22 ⭐⭐⭐ (29%) · 34 ⭐⭐ (45%) · 18 ⭐ (24%) · 14 con 🐛 origen documentado**
+**Resumen: 24 ⭐⭐⭐ (31%) · 34 ⭐⭐ (44%) · 19 ⭐ (25%) · 15 con 🐛 origen documentado**
 
 ---
 
 ## Índice de reglas por sector
 
-> **Total: 75 reglas** en 6 sectores + comunicación de resultados (14 marcadas con 🐛 — nacidas de bugs reales). Última actualización: 2026-04-17.
+> **Total: 77 reglas** en 6 sectores + comunicación de resultados (15 marcadas con 🐛 — nacidas de bugs reales). Última actualización: 2026-06-22.
 > Tras 11 fusiones de reglas duplicadas/solapadas, se eliminaron 16 bullets sin perder conceptos.
 >
 > **Alcance:** Las reglas de Python, TypeScript, API REST y UX aplican solo a proyectos con ese stack. Los servicios backend puros sin UI omiten las reglas de UX. El resto son globales sin excepción.
@@ -78,16 +78,16 @@ Experiencia de usuario y diseño de interfaces.
 |---------|--------|-----------|
 | UX — Diseño de interfaces | 6 | Seleccionable (no texto), TDAH-friendly, listas sobre párrafos, accesibilidad, estados carga/error, responsive |
 
-### 6. Proceso de trabajo (18 reglas)
+### 6. Proceso de trabajo (20 reglas)
 
 Cómo se trabaja con los agentes y el repositorio.
 
 | Sección | Reglas | Qué cubre |
 |---------|--------|-----------|
-| Commits y git | 10 | No --no-verify, un commit = una cosa, cierre por tarea, no acumular WIP, push fin de sesión, status inicio/fin, ramas efímeras ≤7 días, revisión tras agentes, formato, ramas, paridad CI/pre-push en services |
+| Commits y git | 11 | No --no-verify, un commit = una cosa, cierre por tarea, commit+push proactivo agente, no acumular WIP, push fin de sesión, status inicio/fin, ramas efímeras ≤7 días, revisión tras agentes, formato, ramas, paridad CI/pre-push en services |
 | Validar antes de implementar | 3 | Checklist pre-implementación (5 puntos), gate de lectura + sugerencias, cuándo omitir |
 | Comunicación IA-usuario | 3 | Adaptar al nivel del usuario, preguntar preferencias, resumen «Carlos» en una línea |
-| Pendientes explícitos | 1 | No cerrar con cabos sueltos sin listarlos |
+| Pendientes explícitos | 2 | No cerrar con cabos sueltos sin listarlos, cierre real (Definition of Done) |
 | Reglas nacidas de bugs reales | 1 | Bug recurrente → regla nueva con 🐛, protegida contra eliminación |
 
 ### Además
@@ -121,6 +121,7 @@ Cómo se trabaja con los agentes y el repositorio.
 - ⭐⭐ **Convención de ramas:** `main` es la rama estable. Desarrollo en ramas `tipo/descripcion-corta` (ej. `feat/auth-jwt`, `fix/encoding-windows`, `refactor/voice-service`). No se pushea directo a `main` — siempre rama → merge. Tags de release en `main` (ej. `v0.1.0-fase1`).
 - ⭐⭐ **En `D:\services\`, paridad con CI antes de publicar cambios:** seguir **`docs/CI_BASE_ECOSISTEMA.md`** y **`docs/ENTORNO_PYTHON.md`** (§ pre-push): instalar hooks `pre-commit` y **`pre-push`** desde la raíz del repo; el push debe pasar la misma lógica que allí se describe (p. ej. matriz pytest + Vitest del dashboard). Sin hooks instalados, equivalente manual con **`scripts/testing/run-pytest-pre-push.py`** y el flujo Vitest descrito en esa doc. Otros proyectos del ecosistema: su propio workflow / `CI_BASE` del repo.
 - ⭐⭐⭐ **Commit al terminar cada tarea cerrada.** No acumular 10 tareas sin commitear. Una tarea = un commit (o varios si son cambios coherentes separados). Nunca dejar una sesión con 50+ archivos modificados sin commitear. _(🐛 origen: sesión con 42 commits locales + 100+ archivos sin commit tras un día de trabajo con agentes)_
+- ⭐⭐⭐ **El agente hace commit y push por iniciativa propia** cuando cierra una tarea publicable (tests del scope verdes, cambio acotado, sin mezclar WIP ajeno). No esperar a que Carlos pida «commitea» o «pushea». Si hay WIP mezclado, commitear **solo** los archivos del bloque cerrado. Pedir OK antes de push solo en casos sensibles: secretos, prod/staging, force push o reescritura de historia. _(Decisión Carlos 2026-06-16)_
 - ⭐⭐⭐ **Push al cerrar sesión de trabajo.** Antes de apagar el PC o cerrar el IDE, hacer `git push` de todos los commits locales. Evitar acumular commits *ahead* de `origin` que puedan perderse si falla el disco o se necesita trabajar desde otra máquina.
 - ⭐⭐ **Revisar `git status` al inicio y final de sesión.** Al empezar: saber qué quedó pendiente. Al terminar: confirmar que todo está commiteado y pusheado.
 - ⭐⭐ **Ramas efímeras se cierran o mergean en máximo 7 días.** Si una rama lleva más de una semana sin merge o actualización desde el tronco, decidir: merge a `main`/`master` o eliminar. Ramas abandonadas acumulan deuda y divergen del tronco. _(🐛 origen: ramas `chore/ci-github-actions` en services y SALUD abandonadas con commits sin merge)_
@@ -157,6 +158,7 @@ Cómo se trabaja con los agentes y el repositorio.
 
 - ⭐ **Adaptar la comunicación al nivel del usuario.** Si no entiende algo (término técnico, opciones), reformular en lenguaje más claro. Si indica que no entiende, simplificar sin que tenga que pedirlo dos veces.
 - ⭐⭐ **Si hay varias formas de hacer algo** (UX, flujo, criterios, diseño), preguntar cuál prefiere el usuario en lugar de elegir por él. No dar por hecho preferencias no expresadas.
+- ⭐⭐ **Asesoramiento de práctica profesional (agentes Cursor / desarrollo).** Cuando el usuario pide algo concreto (integración, paquete, flujo, producto de un fabricante, algo «muy específico» de un sector), además de cumplir lo pedido, aportar **brevemente** cómo suele hacerse en la industria si hay una práctica estándar, un paso habitual que falta o un riesgo frecuente — sin sustituir su decisión ni convertir la respuesta en un tutorial. **Alcance:** agentes IDE (Tim, Cursor) al codificar o diseñar contigo; **no** aplica como bloque de prompt en **Roberta voz** (modelo local pequeño: datos y FAQ vía tools/`knowledge_query`; ver R6 en `PLAN_ROBERTA_WEB_Y_CONOCIMIENTO.md`). En producto con IA/voz: **datos verificables** (precios, estados, clientes, specs) solo vía tools/código.
 - ⭐⭐ **«Respuesta para Carlos» — resumen en una línea primero.** Si el usuario pide explícitamente una **respuesta para Carlos** (u otra fórmula clara con el mismo sentido: p. ej. «solo una línea», «resumen ultra breve para Carlos»), **empezar** la respuesta con **una sola línea** clara y concisa con lo esencial; solo después, si sigue siendo útil, añadir detalle en **listas muy cortas** o bloques breves — evitar muros de párrafo. _(Motivo: TDAH / no perderse en demasiado texto.)_
 
 ### Selección de modelo (asistente de código)
@@ -166,6 +168,7 @@ En el IDE (p. ej. Cursor), elegir entre **modelo estándar vs avanzado** (ej. So
 - ⭐ **Tareas simples** — documentación, configs, formateo, commits, cambios acotados a un solo archivo: preferir **modelo estándar**.
 - ⭐ **Tareas complejas** — arquitectura, refactors que tocan varios archivos (p. ej. 3+), depuración con hardware real, planes con decisiones de diseño: preferir **modelo avanzado**.
 - ⭐ **En caso de duda**, empezar con modelo estándar. Si el agente se atasca, repite errores o el resultado es claramente pobre, pasar a modelo avanzado.
+- Referencia operativa (sin ampliar criterios aquí): `docs/BITACORA_MODELOS_CURSOR.md`.
 
 ### No romper lo existente
 
@@ -338,6 +341,7 @@ Pendiente: Actualizar los 2 consumidores para usar el token en header
 ### Pendientes explícitos
 
 - ⭐⭐ **Si quedan cosas pendientes de lo pedido, listarlas explícitamente.** No terminar con "ya casi está" sin decir qué falta. Si algo no se completó, se lista con claridad: qué queda, por qué no se hizo, y si necesita acción del usuario. Si el agente sabe que algo puede fallar o necesita revisión, lo dice — no se asume que "el usuario ya lo verá".
+- ⭐⭐⭐ **Cuando se cierra algo, se cierra de verdad — sin cabos sueltos por menores que sean.** Una tarea/fase NO está cerrada hasta cumplir su *Definition of Done* completa: código + tests verdes (0 failed/skipped/warnings) + validación real (smoke/servicio reiniciado si aplica) + docs/planes/DEUDA actualizados + commit. No se aparcan sub-items "menores" (un filtro, un puntero de doc, un test de paridad, un TODO) para "luego": o se hacen ahora, o se listan explícitamente como pendiente abierto con su ID y motivo — nunca se dan por hechos en silencio. Si al cerrar quedan IDs en `abierto`/`en_curso` que pertenecían al alcance, no se anuncia la fase como cerrada. _(🐛 origen: cierres de fase declarados "hechos" dejando D03/D04/D06 y subtareas "menores" sin terminar, que luego se olvidan)_
 
 ### Reglas nacidas de bugs reales
 
