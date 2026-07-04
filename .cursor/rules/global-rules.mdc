@@ -98,7 +98,7 @@ Cómo se trabaja con los agentes y el repositorio.
 | Estructura mínima de servicio | Template de archivos + checklist de cierre (6 items) |
 | Comunicación de resultados | Formato estándar y extendido de resumen (1 regla) |
 | Sincronización | Script `sync-global-rules.ps1` para propagar cambios |
-| Planificación | Ubicación de planes, formato obligatorio, cabecera de estado, regla de 30 días |
+| Planificación | Ubicación de planes, formato obligatorio, cabecera de estado, modelo recomendado, regla de 30 días |
 
 ---
 
@@ -167,6 +167,7 @@ En el IDE (p. ej. Cursor), elegir entre **modelo estándar vs avanzado** (ej. So
 
 - ⭐ **Tareas simples** — documentación, configs, formateo, commits, cambios acotados a un solo archivo: preferir **modelo estándar**.
 - ⭐ **Tareas complejas** — arquitectura, refactors que tocan varios archivos (p. ej. 3+), depuración con hardware real, planes con decisiones de diseño: preferir **modelo avanzado**.
+- ⭐⭐ **Al pedir redactar un plan** (`PLAN_*.md`, «hazme un plan», «planifica», etc.): clasificar el plan (trivial/media/compleja) según `docs/BITACORA_MODELOS_CURSOR.md` § Planificación; **decir siempre al inicio** qué modelo conviene para redactarlo (estándar vs avanzado; en complejo evitar Auto); al escribir el archivo, incluir en cabecera `> Modelo recomendado: … | Motivo: …`. Ver `.cursor/rules/model-recommendation.mdc`.
 - ⭐ **En caso de duda**, empezar con modelo estándar. Si el agente se atasca, repite errores o el resultado es claramente pobre, pasar a modelo avanzado.
 - Referencia operativa (sin ampliar criterios aquí): `docs/BITACORA_MODELOS_CURSOR.md`.
 
@@ -375,18 +376,20 @@ Esto propaga los cambios a todos los proyectos del ecosistema.
 
 ### Cabecera obligatoria de estado
 
-Todo plan activo debe empezar con esta línea (blockquote):
+Todo plan activo debe empezar con estas líneas (blockquote):
 
 ```
 > Estado: ACTIVO | Creado: YYYY-MM-DD | Última revisión: YYYY-MM-DD
 > Validado por Carlos: [ ]
+> Modelo recomendado: [estándar | avanzado] | Motivo: [razón breve]
 ```
 
-La línea de validación va **justo después** de la cabecera de estado:
+La línea de validación va **justo después** de la cabecera de estado; la de modelo recomendado **después** de la validación:
 
 ```
 > Estado: ACTIVO | Creado: YYYY-MM-DD | Última revisión: YYYY-MM-DD
 > Validado por Carlos: [ ]
+> Modelo recomendado: avanzado | Motivo: arquitectura multi-servicio con trade-offs
 ```
 
 - Cuando Carlos valide el plan tras revisarlo, la casilla pasa a `[x]`.
@@ -403,15 +406,17 @@ Todo archivo `PLAN_*.md` debe contener estas secciones:
 
 1. **Cabecera de estado** — Línea `> Estado: ACTIVO | Creado: ... | Última revisión: ...`
 2. **Validado por Carlos (casilla)** — Línea `> Validado por Carlos: [ ]` o `> Validado por Carlos: [x]`.
-3. **Objetivo** — Qué se quiere conseguir (1-2 frases).
-4. **Tareas** — Tabla con: tarea, prioridad (alta/media/baja), esfuerzo estimado (bajo/medio/alto), dependencias.
-5. **Riesgos y regresiones** — Qué puede salir mal, qué se puede romper.
-6. **Aprobación** — Pedir OK explícito del usuario antes de implementar.
+3. **Modelo recomendado** — Línea `> Modelo recomendado: [estándar | avanzado] | Motivo: ...` (la pone el agente al redactar; ver § Selección de modelo).
+4. **Objetivo** — Qué se quiere conseguir (1-2 frases).
+5. **Tareas** — Tabla con: tarea, prioridad (alta/media/baja), esfuerzo estimado (bajo/medio/alto), dependencias.
+6. **Riesgos y regresiones** — Qué puede salir mal, qué se puede romper.
+7. **Aprobación** — Pedir OK explícito del usuario antes de implementar.
 
 | Elemento | Obligatorio |
 |----------|-------------|
 | Cabecera Estado | Sí |
 | Validado por Carlos (casilla) | Sí |
+| Modelo recomendado | Sí |
 | Objetivo | Sí |
 | Tareas | Sí |
 | Riesgos y regresiones | Sí |
