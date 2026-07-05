@@ -19,13 +19,13 @@ Aplican a **todos** los proyectos del ecosistema (`D:\services\`, `D:\projects\`
 > Las reglas con origen en bugs reales detectados en el ecosistema son automáticamente ⭐⭐⭐.
 > Las que afectan seguridad o pérdida de datos son ⭐⭐⭐.
 
-**Resumen: 24 ⭐⭐⭐ (31%) · 34 ⭐⭐ (44%) · 19 ⭐ (25%) · 15 con 🐛 origen documentado**
+**Resumen: 25 ⭐⭐⭐ (32%) · 34 ⭐⭐ (44%) · 19 ⭐ (24%) · 16 con 🐛 origen documentado**
 
 ---
 
 ## Índice de reglas por sector
 
-> **Total: 77 reglas** en 6 sectores + comunicación de resultados (15 marcadas con 🐛 — nacidas de bugs reales). Última actualización: 2026-06-22.
+> **Total: 78 reglas** en 6 sectores + comunicación de resultados (16 marcadas con 🐛 — nacidas de bugs reales). Última actualización: 2026-07-05.
 > Tras 11 fusiones de reglas duplicadas/solapadas, se eliminaron 16 bullets sin perder conceptos.
 >
 > **Alcance:** Las reglas de Python, TypeScript, API REST y UX aplican solo a proyectos con ese stack. Los servicios backend puros sin UI omiten las reglas de UX. El resto son globales sin excepción.
@@ -78,13 +78,13 @@ Experiencia de usuario y diseño de interfaces.
 |---------|--------|-----------|
 | UX — Diseño de interfaces | 6 | Seleccionable (no texto), TDAH-friendly, listas sobre párrafos, accesibilidad, estados carga/error, responsive |
 
-### 6. Proceso de trabajo (20 reglas)
+### 6. Proceso de trabajo (21 reglas)
 
 Cómo se trabaja con los agentes y el repositorio.
 
 | Sección | Reglas | Qué cubre |
 |---------|--------|-----------|
-| Commits y git | 11 | No --no-verify, un commit = una cosa, cierre por tarea, commit+push proactivo agente, no acumular WIP, push fin de sesión, status inicio/fin, ramas efímeras ≤7 días, revisión tras agentes, formato, ramas, paridad CI/pre-push en services |
+| Commits y git | 12 | No --no-verify, un commit = una cosa, cierre por tarea, commit+push proactivo agente, no acumular WIP, push fin de sesión, status inicio/fin, ramas efímeras ≤7 días, revisión tras agentes, declarar repos a tocar, formato, ramas, paridad CI/pre-push en services |
 | Validar antes de implementar | 3 | Checklist pre-implementación (5 puntos), gate de lectura + sugerencias, cuándo omitir |
 | Comunicación IA-usuario | 3 | Adaptar al nivel del usuario, preguntar preferencias, resumen «Carlos» en una línea |
 | Pendientes explícitos | 2 | No cerrar con cabos sueltos sin listarlos, cierre real (Definition of Done) |
@@ -126,6 +126,7 @@ Cómo se trabaja con los agentes y el repositorio.
 - ⭐⭐ **Revisar `git status` al inicio y final de sesión.** Al empezar: saber qué quedó pendiente. Al terminar: confirmar que todo está commiteado y pusheado.
 - ⭐⭐ **Ramas efímeras se cierran o mergean en máximo 7 días.** Si una rama lleva más de una semana sin merge o actualización desde el tronco, decidir: merge a `main`/`master` o eliminar. Ramas abandonadas acumulan deuda y divergen del tronco. _(🐛 origen: ramas `chore/ci-github-actions` en services y SALUD abandonadas con commits sin merge)_
 - ⭐⭐ **Después de trabajar con agentes de Cursor, revisar `git status` antes de pasar a otro tema.** Los agentes pueden dejar archivos modificados o nuevos que no recuerdas. Confirmar qué hizo el agente antes de seguir.
+- ⭐⭐⭐ **El agente declara al inicio qué repos/carpetas va a tocar (para evitar dos agentes en el mismo repo).** Al arrancar una tarea no trivial o al redactar un plan, el agente lista en su **primer mensaje** los repositorios y carpetas que modificará (ej. «trabajo en `D:\services` y `D:\projects\sistema-gestion-fiscal`»). No hay lock técnico entre agentes de Cursor: es una **convención de declaración explícita** para que Carlos no lance otro agente en esos repos hasta que el primero cierre (commit+push). Si al empezar el agente encuentra cambios ajenos sin commitear en su repo objetivo, **avisa antes de tocar** y commitea solo los archivos de su bloque. _(🐛 origen: pérdida de ediciones en `servicio-compras`/`servicio-facturacion` por otro agente commiteando en paralelo en el mismo repo)_
 
 ### Errores
 
@@ -399,6 +400,11 @@ La línea de validación va **justo después** de la cabecera de estado; la de m
 - El agente actualiza "Última revisión" cada vez que modifica el plan.
 - Si un plan lleva más de 30 días sin revisión → mover a `docs/historial/` o actualizar con fecha nueva.
 - Planes en `docs/historial/` cambian el estado a COMPLETADO o ARCHIVADO (no necesitan fecha de revisión).
+
+**Higiene automática (solo `D:\services\`):**
+
+- `python scripts/normalize_plan_headers.py` inserta las líneas `Validado por Carlos` y `Modelo recomendado` que falten en los planes **ACTIVO** (idempotente; no toca COMPLETADO/ARCHIVADO ni historial).
+- `python scripts/audit.py --check plan_headers` (integrado en el guardian general) falla si un plan ACTIVO tiene la cabecera incompleta. Documento maestro de orden: [PLAN_PRIORIDAD_PRODUCTO.md](PLAN_PRIORIDAD_PRODUCTO.md).
 
 ### Formato obligatorio de un plan
 
