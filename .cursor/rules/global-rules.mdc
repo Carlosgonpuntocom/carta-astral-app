@@ -434,6 +434,18 @@ Opcional:
 
 > No se estiman tiempos en horas. El esfuerzo se mide como bajo/medio/alto.
 
+### Ritual por capas (agentes Cursor)
+
+⭐⭐ Al pedir un plan, el agente trabaja **por capas** y **pregunta antes de pasar a la siguiente** (regla `.cursor/rules/plan-por-capas.mdc`):
+
+1. **Redactar** — siempre  
+2. **Expandir** — media/compleja  
+3. **Sorpresas código** — compleja (o media con API/servicios)  
+4. **Rollback / día D** — cutover, flags, multi-servicio o breaking  
+5. **Tests frágiles** — si hay tests/mocks acoplados al cambio  
+
+Atajos del usuario: «expandelo», «sorpresas», «rollback», «tests que fallan», o «todas las capas» para saltar los gates. Planes **triviales**: solo capa 1 salvo que pida más. Tras las capas → validar casilla; **no implementar** con `[ ]`.
+
 ---
 
 ## UX — Diseño de interfaces
