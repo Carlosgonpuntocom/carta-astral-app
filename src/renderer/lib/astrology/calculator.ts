@@ -1,5 +1,4 @@
-// El bundle publicado es CJS (solo exporta Origin y Horoscope; no hay default). Import nombrado funciona en Vite y en Node.
-import { Origin, Horoscope } from 'circular-natal-horoscope-js'
+import { Origin, Horoscope } from './horoscope-lib'
 import type { BirthData, PlanetPosition, ChartData, Aspect } from '../../types/astrology'
 
 // Mapeo de nombres de planetas en inglés a español (incluye mayúsculas y minúsculas)

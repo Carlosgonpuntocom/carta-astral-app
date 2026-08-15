@@ -1,17 +1,18 @@
 import { describe, it, expect } from 'vitest'
-import { Origin, Horoscope } from 'circular-natal-horoscope-js'
 import * as horoscopeNamespace from 'circular-natal-horoscope-js'
+import { Origin, Horoscope } from '../../../renderer/lib/astrology/horoscope-lib'
 
 /**
- * Regresión: el bundle publicado es CommonJS (`module.exports = { Origin, Horoscope }`).
- * En el renderer (Vite/ESM) `import lib from 'circular-natal-horoscope-js'` falla:
- * «does not provide an export named 'default'».
- * Hay que usar siempre importaciones nombradas `{ Origin, Horoscope }`.
+ * Regresión: Electron main (Node ESM) y renderer (Vite) resuelven distinto módulos CJS.
+ * El helper `horoscope-lib` soporta ambas rutas (named/default) y evita el crash en main.
  */
-describe('circular-natal-horoscope-js (contrato ESM)', () => {
-  it('expone Origin y Horoscope como exports nombrados', () => {
+describe('circular-natal-horoscope-js (compatibilidad CJS/ESM)', () => {
+  it('expone Origin y Horoscope en el namespace del paquete', () => {
     expect(horoscopeNamespace).toHaveProperty('Origin')
     expect(horoscopeNamespace).toHaveProperty('Horoscope')
+  })
+
+  it('el helper resuelve constructores válidos', () => {
     expect(typeof Origin).toBe('function')
     expect(typeof Horoscope).toBe('function')
   })

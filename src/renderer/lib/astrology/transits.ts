@@ -1,4 +1,4 @@
-import { Origin, Horoscope } from 'circular-natal-horoscope-js'
+import { Origin, Horoscope } from './horoscope-lib'
 import type { ChartData, Transit, TransitAspectType, BirthData } from '../../types/astrology'
 import { getInterpretation } from './interpretations'
 
