@@ -371,9 +371,18 @@ Esto propaga los cambios a todos los proyectos del ecosistema.
 
 ### Ubicación de planes
 
-- **Planes activos:** `docs/PLAN_nombre.md` en la raíz de docs del proyecto.
-- **Planes completados u obsoletos:** `docs/historial/PLAN_nombre.md`.
-- **`.cursor/plans/`:** no se versiona (`.gitignore`). Si un plan de Cursor tiene valor, se copia manualmente a `docs/PLAN_nombre.md`.
+- ⭐⭐ **El plan vive en el repo dueño** (donde se implementará la mayor parte del código), no por defecto en `D:\services\docs\`. Regla Cursor: `.cursor/rules/plan-ubicacion-repo.mdc`.
+- **Planes activos:** `docs/PLAN_nombre.md` en la raíz de docs **de ese repo** (`D:\services\`, `D:\projects\sistema-gestion-fiscal\`, `D:\projects\SALUD\`, etc.).
+- **Planes completados u obsoletos:** `docs/historial/PLAN_nombre.md` del mismo repo.
+- **Multi-repo:** un solo plan canónico en el primario; cabecera `> Repos: …`; en secundarios solo puntero/enlace, sin duplicar el plan entero.
+- **`.cursor/plans/`:** no se versiona (`.gitignore`). Si un plan de Cursor tiene valor, se copia manualmente a `docs/PLAN_nombre.md` del repo dueño.
+
+| Código mayormente en… | Plan en… |
+|------------------------|----------|
+| `D:\services\` (Roberta, email, alert, dashboard, shared…) | `D:\services\docs\PLAN_*.md` |
+| Fiscal facturación/compras/UI | `D:\projects\sistema-gestion-fiscal\docs\PLAN_*.md` |
+| App/backend SALUD | `D:\projects\SALUD\docs\PLAN_*.md` |
+| Otro proyecto en `D:\projects\<app>\` | `D:\projects\<app>\docs\PLAN_*.md` |
 
 ### Cabecera obligatoria de estado
 
@@ -383,14 +392,18 @@ Todo plan activo debe empezar con estas líneas (blockquote):
 > Estado: ACTIVO | Creado: YYYY-MM-DD | Última revisión: YYYY-MM-DD
 > Validado por Carlos: [ ]
 > Modelo recomendado: [estándar | avanzado] | Motivo: [razón breve]
+> Ejecución: [OK Auto | mejor avanzado | avanzado (no Auto)]
+> Repos: [services | fiscal | SALUD | …] | Primario: [motivo breve si multi]
 ```
 
-La línea de validación va **justo después** de la cabecera de estado; la de modelo recomendado **después** de la validación:
+La línea de validación va **justo después** de la cabecera de estado; la de modelo recomendado **después** de la validación; la de **Ejecución** después del modelo (con qué chat implementar sin/con avanzado; ver `BITACORA_MODELOS_CURSOR.md` § Ejecución); la de **Repos** después (obligatoria en planes nuevos; en mono-repo basta p. ej. `> Repos: services`):
 
 ```
 > Estado: ACTIVO | Creado: YYYY-MM-DD | Última revisión: YYYY-MM-DD
 > Validado por Carlos: [ ]
 > Modelo recomendado: avanzado | Motivo: arquitectura multi-servicio con trade-offs
+> Ejecución: avanzado (no Auto)
+> Repos: services, fiscal | Primario: services — tools voz; fiscal proxy UI
 ```
 
 - Cuando Carlos valide el plan tras revisarlo, la casilla pasa a `[x]`.
@@ -403,7 +416,8 @@ La línea de validación va **justo después** de la cabecera de estado; la de m
 
 **Higiene automática (solo `D:\services\`):**
 
-- `python scripts/normalize_plan_headers.py` inserta las líneas `Validado por Carlos` y `Modelo recomendado` que falten en los planes **ACTIVO** (idempotente; no toca COMPLETADO/ARCHIVADO ni historial).
+- `python scripts/normalize_plan_headers.py` inserta las líneas `Validado por Carlos`, `Modelo recomendado` y `Ejecución` que falten en los planes **ACTIVO** (idempotente; no toca COMPLETADO/ARCHIVADO ni historial).
+- `python scripts/backfill_plan_ejecucion.py` reclasifica `Ejecución` y regenera [`docs/INDICE_PLANES_EJECUCION.md`](INDICE_PLANES_EJECUCION.md).
 - `python scripts/audit.py --check plan_headers` (integrado en el guardian general) falla si un plan ACTIVO tiene la cabecera incompleta. Documento maestro de orden: [PLAN_PRIORIDAD_PRODUCTO.md](PLAN_PRIORIDAD_PRODUCTO.md).
 
 ### Formato obligatorio de un plan
@@ -413,16 +427,20 @@ Todo archivo `PLAN_*.md` debe contener estas secciones:
 1. **Cabecera de estado** — Línea `> Estado: ACTIVO | Creado: ... | Última revisión: ...`
 2. **Validado por Carlos (casilla)** — Línea `> Validado por Carlos: [ ]` o `> Validado por Carlos: [x]`.
 3. **Modelo recomendado** — Línea `> Modelo recomendado: [estándar | avanzado] | Motivo: ...` (la pone el agente al redactar; ver § Selección de modelo).
-4. **Objetivo** — Qué se quiere conseguir (1-2 frases).
-5. **Tareas** — Tabla con: tarea, prioridad (alta/media/baja), esfuerzo estimado (bajo/medio/alto), dependencias.
-6. **Riesgos y regresiones** — Qué puede salir mal, qué se puede romper.
-7. **Aprobación** — Pedir OK explícito del usuario antes de implementar.
+4. **Ejecución** — Línea `> Ejecución: [OK Auto | mejor avanzado | avanzado (no Auto)]` (con qué chat implementar; ver `BITACORA_MODELOS_CURSOR.md` § Ejecución).
+5. **Repos** — Línea `> Repos: …` (repo dueño; si multi, primario + motivo). Ver `plan-ubicacion-repo.mdc`.
+6. **Objetivo** — Qué se quiere conseguir (1-2 frases).
+7. **Tareas** — Tabla con: tarea, prioridad (alta/media/baja), esfuerzo estimado (bajo/medio/alto), dependencias.
+8. **Riesgos y regresiones** — Qué puede salir mal, qué se puede romper.
+9. **Aprobación** — Pedir OK explícito del usuario antes de implementar.
 
 | Elemento | Obligatorio |
 |----------|-------------|
 | Cabecera Estado | Sí |
 | Validado por Carlos (casilla) | Sí |
 | Modelo recomendado | Sí |
+| Ejecución | Sí (planes ACTIVO en `D:\services\`) |
+| Repos (dueño / multi) | Sí en planes **nuevos** (`> Repos: …`) |
 | Objetivo | Sí |
 | Tareas | Sí |
 | Riesgos y regresiones | Sí |
@@ -438,11 +456,11 @@ Opcional:
 
 ⭐⭐ Al pedir un plan, el agente trabaja **por capas** y **pregunta antes de pasar a la siguiente** (regla `.cursor/rules/plan-por-capas.mdc`):
 
-1. **Redactar** — siempre  
-2. **Expandir** — media/compleja  
-3. **Sorpresas código** — compleja (o media con API/servicios)  
-4. **Rollback / día D** — cutover, flags, multi-servicio o breaking  
-5. **Tests frágiles** — si hay tests/mocks acoplados al cambio  
+1. **Redactar** — siempre
+2. **Expandir** — media/compleja
+3. **Sorpresas código** — compleja (o media con API/servicios)
+4. **Rollback / día D** — cutover, flags, multi-servicio o breaking
+5. **Tests frágiles** — si hay tests/mocks acoplados al cambio
 
 Atajos del usuario: «expandelo», «sorpresas», «rollback», «tests que fallan», o «todas las capas» para saltar los gates. Planes **triviales**: solo capa 1 salvo que pida más. Tras las capas → validar casilla; **no implementar** con `[ ]`.
 
