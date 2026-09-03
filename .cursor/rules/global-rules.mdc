@@ -19,13 +19,13 @@ Aplican a **todos** los proyectos del ecosistema (`D:\services\`, `D:\projects\`
 > Las reglas con origen en bugs reales detectados en el ecosistema son automáticamente ⭐⭐⭐.
 > Las que afectan seguridad o pérdida de datos son ⭐⭐⭐.
 
-**Resumen: 28 ⭐⭐⭐ (35%) · 34 ⭐⭐ (42%) · 19 ⭐ (23%) · 18 con 🐛 origen documentado**
+**Resumen: 29 ⭐⭐⭐ (35%) · 34 ⭐⭐ (41%) · 19 ⭐ (23%) · 19 con 🐛 origen documentado**
 
 ---
 
 ## Índice de reglas por sector
 
-> **Total: 81 reglas** en 6 sectores + comunicación de resultados (18 marcadas con 🐛 — nacidas de bugs reales). Última actualización: 2026-09-03.
+> **Total: 82 reglas** en 6 sectores + comunicación de resultados (19 marcadas con 🐛 — nacidas de bugs reales). Última actualización: 2026-09-03.
 > Tras 11 fusiones de reglas duplicadas/solapadas, se eliminaron 16 bullets sin perder conceptos.
 >
 > **Alcance:** Las reglas de Python, TypeScript, API REST y UX aplican solo a proyectos con ese stack. Los servicios backend puros sin UI omiten las reglas de UX. El resto son globales sin excepción.
@@ -62,13 +62,13 @@ Cómo se construyen y comunican los servicios.
 | Errores | 8 | Sin fallbacks silenciosos, contexto, timeouts, env vars fail-fast, logging levels, idempotencia, pipes que ocultan el código de salida |
 | Arquitectura | 4 | Compartido vs específico, datos en BD, sin Docker |
 
-### 4. Seguridad (3 reglas)
+### 4. Seguridad (4 reglas)
 
 Proteger datos y secretos.
 
 | Sección | Reglas | Qué cubre |
 |---------|--------|-----------|
-| Seguridad en código | 3 | No hardcodear datos reales, no loguear sensibles, no subir .env |
+| Seguridad en código | 4 | No hardcodear datos reales, no loguear sensibles, no subir .env, documentar la barrera por la línea que cierra |
 
 ### 5. Frontend y UX (6 reglas)
 
@@ -196,6 +196,7 @@ En el IDE (p. ej. Cursor), elegir entre **modelo estándar vs avanzado** (ej. So
 - ⭐⭐⭐ **No hardcodear ningún dato real en código:** ni API keys, contraseñas, tokens, ni tampoco IDs, emails, URLs de producción o datos de usuarios. Todo en variables de entorno, configuración o BD. Un `grep` del repositorio no debe revelar datos reales de ningún tipo.
 - ⭐⭐⭐ **No loguear datos sensibles** en claro (contraseñas, tokens, datos personales completos). Si hace falta traza, loguear solo un identificador (ej. `user_id=X`), no el valor.
 - ⭐⭐⭐ **No subir `.env`** ni archivos con secretos al repositorio; mantener `.gitignore` actualizado.
+- ⭐⭐⭐ **Al documentar una barrera, citar la línea que cierra el paso, no una que la acompaña.** Una validación, un allowlist o una comprobación de permisos se documentan señalando **la línea que rechaza la entrada mala**. Prueba de que lo es: construye una entrada que la dispare. Si no puedes construirla, no es una barrera — es una aserción defensiva, y hay que llamarla así, porque venderla como protección deja tranquilo a quien venga después. _(🐛 origen: 2026-09-03, `system-service/CLAUDE.md` describía como «doble verificación» de `run_script` un `relative_to(SCRIPTS_DIR)` que **no puede fallar nunca** —las 8 rutas se construyen a partir de ese mismo directorio—; lo que cierra el paso estaba en otro archivo, `validators.py:76-80`. De 27 afirmaciones verificadas, 3 eran falsas y **2 describían mal una barrera de seguridad**)_
 
 ### Fases y aprobación
 
