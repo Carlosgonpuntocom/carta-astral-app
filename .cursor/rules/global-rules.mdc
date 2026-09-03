@@ -19,13 +19,13 @@ Aplican a **todos** los proyectos del ecosistema (`D:\services\`, `D:\projects\`
 > Las reglas con origen en bugs reales detectados en el ecosistema son automáticamente ⭐⭐⭐.
 > Las que afectan seguridad o pérdida de datos son ⭐⭐⭐.
 
-**Resumen: 25 ⭐⭐⭐ (32%) · 34 ⭐⭐ (44%) · 19 ⭐ (24%) · 16 con 🐛 origen documentado**
+**Resumen: 27 ⭐⭐⭐ (34%) · 34 ⭐⭐ (42%) · 19 ⭐ (24%) · 18 con 🐛 origen documentado**
 
 ---
 
 ## Índice de reglas por sector
 
-> **Total: 78 reglas** en 6 sectores + comunicación de resultados (16 marcadas con 🐛 — nacidas de bugs reales). Última actualización: 2026-07-05.
+> **Total: 80 reglas** en 6 sectores + comunicación de resultados (18 marcadas con 🐛 — nacidas de bugs reales). Última actualización: 2026-09-03.
 > Tras 11 fusiones de reglas duplicadas/solapadas, se eliminaron 16 bullets sin perder conceptos.
 >
 > **Alcance:** Las reglas de Python, TypeScript, API REST y UX aplican solo a proyectos con ese stack. Los servicios backend puros sin UI omiten las reglas de UX. El resto son globales sin excepción.
@@ -53,13 +53,13 @@ Cómo se escribe el código en todo el ecosistema.
 | TypeScript | 4 | strict mode, interfaces, props tipadas, no any |
 | API REST | 4 | Formato respuesta, endpoints, paginación, códigos HTTP y mensajes error |
 
-### 3. Backend, errores y servicios (10 reglas)
+### 3. Backend, errores y servicios (11 reglas)
 
 Cómo se construyen y comunican los servicios.
 
 | Sección | Reglas | Qué cubre |
 |---------|--------|-----------|
-| Errores | 7 | Sin fallbacks silenciosos, contexto, timeouts, env vars fail-fast, logging levels, idempotencia |
+| Errores | 8 | Sin fallbacks silenciosos, contexto, timeouts, env vars fail-fast, logging levels, idempotencia, pipes que ocultan el código de salida |
 | Arquitectura | 3 | Compartido vs específico, datos en BD |
 
 ### 4. Seguridad (3 reglas)
@@ -78,13 +78,13 @@ Experiencia de usuario y diseño de interfaces.
 |---------|--------|-----------|
 | UX — Diseño de interfaces | 6 | Seleccionable (no texto), TDAH-friendly, listas sobre párrafos, accesibilidad, estados carga/error, responsive |
 
-### 6. Proceso de trabajo (21 reglas)
+### 6. Proceso de trabajo (22 reglas)
 
 Cómo se trabaja con los agentes y el repositorio.
 
 | Sección | Reglas | Qué cubre |
 |---------|--------|-----------|
-| Commits y git | 12 | No --no-verify, un commit = una cosa, cierre por tarea, commit+push proactivo agente, no acumular WIP, push fin de sesión, status inicio/fin, ramas efímeras ≤7 días, revisión tras agentes, declarar repos a tocar, formato, ramas, paridad CI/pre-push en services |
+| Commits y git | 13 | No --no-verify, un commit = una cosa, cierre por tarea, commit+push proactivo agente, no acumular WIP, push fin de sesión, status inicio/fin, ramas efímeras ≤7 días, revisión tras agentes, declarar repos a tocar, formato, ramas, paridad CI/pre-push en services, `fail-fast: false` en matrices |
 | Validar antes de implementar | 3 | Checklist pre-implementación (5 puntos), gate de lectura + sugerencias, cuándo omitir |
 | Comunicación IA-usuario | 3 | Adaptar al nivel del usuario, preguntar preferencias, resumen «Carlos» en una línea |
 | Pendientes explícitos | 2 | No cerrar con cabos sueltos sin listarlos, cierre real (Definition of Done) |
@@ -121,6 +121,7 @@ Cómo se trabaja con los agentes y el repositorio.
 - ⭐ Mensaje en formato: `tipo: descripción breve` (`feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `test:`).
 - ⭐⭐ **Convención de ramas:** `main` es la rama estable. Desarrollo en ramas `tipo/descripcion-corta` (ej. `feat/auth-jwt`, `fix/encoding-windows`, `refactor/voice-service`). No se pushea directo a `main` — siempre rama → merge. Tags de release en `main` (ej. `v0.1.0-fase1`).
 - ⭐⭐ **En `D:\services\`, paridad con CI antes de publicar cambios:** seguir **`docs/CI_BASE_ECOSISTEMA.md`** y **`docs/ENTORNO_PYTHON.md`** (§ pre-push): instalar hooks `pre-commit` y **`pre-push`** desde la raíz del repo; el push debe pasar la misma lógica que allí se describe (p. ej. matriz pytest + Vitest del dashboard). Sin hooks instalados, equivalente manual con **`scripts/testing/run-pytest-pre-push.py`** y el flujo Vitest descrito en esa doc. Otros proyectos del ecosistema: su propio workflow / `CI_BASE` del repo.
+- ⭐⭐⭐ **Toda matriz de CI lleva `fail-fast: false`.** Con `fail-fast` activo el primer fallo cancela los demás shards: los minutos ya gastados se pierden igual, no se aprende el estado de los otros y hay que relanzar — pagando dos y tres veces por lo que un run completo decía de una. Y esconde fallos durante meses. _(🐛 origen: en facturación fiscal tapó 5 tests de PDF que no corrieron ni una vez desde 2026-08-06 y un INTERNALERROR de pytest presente desde 2026-09-01; en `D:\services` ya estaba bien — `ci.yml:52` y `ci-windows.yml:51`)_
 - ⭐⭐⭐ **Commit al terminar cada tarea cerrada.** No acumular 10 tareas sin commitear. Una tarea = un commit (o varios si son cambios coherentes separados). Nunca dejar una sesión con 50+ archivos modificados sin commitear. _(🐛 origen: sesión con 42 commits locales + 100+ archivos sin commit tras un día de trabajo con agentes)_
 - ⭐⭐⭐ **El agente hace commit y push por iniciativa propia** cuando cierra una tarea publicable (tests del scope verdes, cambio acotado, sin mezclar WIP ajeno). No esperar a que Carlos pida «commitea» o «pushea». Si hay WIP mezclado, commitear **solo** los archivos del bloque cerrado. Pedir OK antes de push solo en casos sensibles: secretos, prod/staging, force push o reescritura de historia. _(Decisión Carlos 2026-06-16)_
 - ⭐⭐⭐ **Push al cerrar sesión de trabajo.** Antes de apagar el PC o cerrar el IDE, hacer `git push` de todos los commits locales. Evitar acumular commits *ahead* de `origin` que puedan perderse si falla el disco o se necesita trabajar desde otra máquina.
@@ -138,6 +139,7 @@ Cómo se trabaja con los agentes y el repositorio.
 - ⭐⭐⭐ **Variables de entorno obligatorias deben fallar al arrancar si faltan.** Nunca `os.getenv("SECRET_KEY")` sin default seguro ni validación. Si la variable es requerida, el servicio debe lanzar un error claro al iniciar (ej. `ValueError: Falta variable de entorno SECRET_KEY`), no fallar críticamente minutos después con un `NoneType`. _(🐛 origen: NoneType por DATABASE_URL_READ_ONLY faltante en SALUD)_
 - ⭐⭐ **Niveles de logging consistentes.** `ERROR`: algo falló y requiere atención (petición fallida, servicio caído, dato corrupto). `WARNING`: algo inesperado pero el sistema se recuperó (retry exitoso, fallback usado, valor por defecto aplicado). `INFO`: eventos normales relevantes (servicio arrancado, petición procesada, migración aplicada). `DEBUG`: detalle técnico solo para desarrollo. No usar `INFO` para errores ni `ERROR` para cosas que no lo son.
 - ⭐⭐⭐ **Operaciones que el usuario puede repetir accidentalmente deben ser idempotentes.** Si la misma acción llega dos veces (doble clic, retry, red lenta), el servidor detecta el duplicado y devuelve la respuesta original sin ejecutar dos veces. Implementar con ventana temporal, idempotency key, o constraint en BD según el caso. _(🐛 origen: doble registro de Omeprazol en SALUD)_
+- ⭐⭐⭐ **Un comando cuyo éxito importa no se canaliza.** `cmd | tail`, `| head` o `| grep` devuelven el código de salida del **último proceso del pipe**, no el del comando. Un `git push` rechazado detrás de un `| tail -40` sale con **0**, y quien lo lea —persona o agente— reporta «subido» en falso. Si hace falta recortar la salida: guardar primero (`cmd > fichero`) o `set -o pipefail`. _(🐛 origen: 2026-09-03, `git push origin master | tail -40` dio éxito con el push rechazado por ref bloqueada)_
 
 ### Arquitectura
 
