@@ -19,13 +19,13 @@ Aplican a **todos** los proyectos del ecosistema (`D:\services\`, `D:\projects\`
 > Las reglas con origen en bugs reales detectados en el ecosistema son automáticamente ⭐⭐⭐.
 > Las que afectan seguridad o pérdida de datos son ⭐⭐⭐.
 
-**Resumen: 27 ⭐⭐⭐ (34%) · 34 ⭐⭐ (42%) · 19 ⭐ (24%) · 18 con 🐛 origen documentado**
+**Resumen: 28 ⭐⭐⭐ (35%) · 34 ⭐⭐ (42%) · 19 ⭐ (23%) · 18 con 🐛 origen documentado**
 
 ---
 
 ## Índice de reglas por sector
 
-> **Total: 80 reglas** en 6 sectores + comunicación de resultados (18 marcadas con 🐛 — nacidas de bugs reales). Última actualización: 2026-09-03.
+> **Total: 81 reglas** en 6 sectores + comunicación de resultados (18 marcadas con 🐛 — nacidas de bugs reales). Última actualización: 2026-09-03.
 > Tras 11 fusiones de reglas duplicadas/solapadas, se eliminaron 16 bullets sin perder conceptos.
 >
 > **Alcance:** Las reglas de Python, TypeScript, API REST y UX aplican solo a proyectos con ese stack. Los servicios backend puros sin UI omiten las reglas de UX. El resto son globales sin excepción.
@@ -53,14 +53,14 @@ Cómo se escribe el código en todo el ecosistema.
 | TypeScript | 4 | strict mode, interfaces, props tipadas, no any |
 | API REST | 4 | Formato respuesta, endpoints, paginación, códigos HTTP y mensajes error |
 
-### 3. Backend, errores y servicios (11 reglas)
+### 3. Backend, errores y servicios (12 reglas)
 
 Cómo se construyen y comunican los servicios.
 
 | Sección | Reglas | Qué cubre |
 |---------|--------|-----------|
 | Errores | 8 | Sin fallbacks silenciosos, contexto, timeouts, env vars fail-fast, logging levels, idempotencia, pipes que ocultan el código de salida |
-| Arquitectura | 3 | Compartido vs específico, datos en BD |
+| Arquitectura | 4 | Compartido vs específico, datos en BD, sin Docker |
 
 ### 4. Seguridad (3 reglas)
 
@@ -145,6 +145,7 @@ Cómo se trabaja con los agentes y el repositorio.
 
 - ⭐⭐ **Funcionalidad compartida → `D:\services\`.** Si dos o más proyectos necesitan lo mismo (IA, voz, OCR, perfil, Git), va a un servicio compartido.
 - ⭐⭐ **Funcionalidad específica → su proyecto.** Lógica de negocio que solo tiene sentido en un proyecto queda en ese proyecto.
+- ⭐⭐⭐ **Nada del ecosistema se ejecuta en Docker.** Los servicios arrancan con `start.bat` / `start.sh` sobre el intérprete del repo (`.conda-env` o el `.venv` del servicio). Un agente **no introduce Docker** ni propone «arranca Docker Desktop» como paso de una tarea — ni siquiera para reproducir un bug: si hace falta un entorno distinto al del PC, ese sitio es el CI. Única excepción viva y documentada: `D:\projects\trading` lleva `Dockerfile` y `docker-compose.yml` en git. _(Decisión Carlos 2026-09-03. Ya constaba como convención en `docs/ECOSYSTEM.md:81` —«Todo se ejecuta con start.bat / start.sh. Sin Docker»— pero no como regla, y por eso los agentes seguían proponiéndolo)_
 - ⭐⭐⭐ **Los datos del usuario se persisten en base de datos, no en el navegador.** No usar `localStorage`, `sessionStorage` ni cookies como almacenamiento principal de datos de negocio. El navegador es para preferencias de UI (tema, idioma, sidebar abierto/cerrado) y tokens de sesión — los datos reales van a la BD siempre. _(🐛 origen: datos de negocio en localStorage en SALUD que se perdían al limpiar caché)_
 
 ### Validar antes de implementar
