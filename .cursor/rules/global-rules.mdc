@@ -19,47 +19,62 @@ Aplican a **todos** los proyectos del ecosistema (`D:\services\`, `D:\projects\`
 > Las reglas con origen en bugs reales detectados en el ecosistema son automáticamente ⭐⭐⭐.
 > Las que afectan seguridad o pérdida de datos son ⭐⭐⭐.
 
-**Resumen: 31 ⭐⭐⭐ (37%) · 34 ⭐⭐ (40%) · 19 ⭐ (23%) · 21 con 🐛 origen documentado**
+**Resumen: 42 ⭐⭐⭐ · 40 ⭐⭐ · 20 ⭐ · 32 con 🐛 origen documentado (102 en total)**
 
 ---
 
 ## Índice de reglas por sector
 
-> **Total: 84 reglas** en 6 sectores + comunicación de resultados (21 marcadas con 🐛 — nacidas de bugs reales). Última actualización: 2026-09-03.
+> **Total: 102 reglas** en 6 sectores + comunicación de resultados (32 marcadas con 🐛 — nacidas de bugs reales). Última actualización: 2026-09-10.
 > Tras 11 fusiones de reglas duplicadas/solapadas, se eliminaron 16 bullets sin perder conceptos.
+>
+> **Recontado a mano el 2026-09-04 y el índice estaba mal:** decía 84 y hay 93. Faltaban dos secciones enteras
+> (**Selección de modelo**, 4 reglas, y **Ubicación de planes**, 1) que nunca entraron en ningún sector, y dos
+> filas se habían quedado cortas por una regla cada una (Comunicación IA-usuario y Pendientes explícitos).
+> Las cuentas de abajo salen de contar los bullets `- ⭐` sección por sección, no de sumar lo que decía antes.
+>
+> **Recontado otra vez el 2026-09-06 antes de añadir la regla de vistas, y esta vez estaba bien:**
+> `grep -c '^- ⭐'` daba **96** y el índice decía 96 (37 ⭐⭐⭐ / 39 ⭐⭐ / 20 ⭐ / 28 🐛). Con la regla
+> nueva son **97 y 29 🐛**. Queda escrito que se comprobó, no que se supuso: la trampa 3 del
+> [`CLAUDE.md`](../CLAUDE.md) hay que pagarla igual cuando el número resulta estar bien.
+>
+> **⚠ Tras tocar este fichero hay que ejecutar `scripts/sync-global-rules.ps1` en el PC de Carlos.**
+> `.cursor/rules/global-rules.mdc` lleva este mismo cuerpo pero está en `.gitignore:138`, así que
+> **no viaja con el repo**: sin ese paso la regla existe aquí y no en Cursor, que es donde se lee
+> mientras se programa.
 >
 > **Alcance:** Las reglas de Python, TypeScript, API REST y UX aplican solo a proyectos con ese stack. Los servicios backend puros sin UI omiten las reglas de UX. El resto son globales sin excepción.
 
-### 1. Calidad y testing (18 reglas)
+### 1. Calidad y testing (20 reglas)
 
 Asegurar que todo funciona y sigue funcionando.
 
 | Sección | Reglas | Qué cubre |
 |---------|--------|-----------|
-| Tests | 9 | 0 failed obligatorio, tests reales, validación real (incl. hardware), arranque limpio, sin rastro fuera del tmp, mocks que no lleguen a `open()`, guardianes probados con mutante |
+| Tests | 11 | 0 failed obligatorio, tests reales, validación real (incl. hardware), arranque limpio, sin rastro fuera del tmp, lo que deja puesto una verificación a mano, mocks que no lleguen a `open()`, guardianes probados con mutante, verde con recuento |
 | No romper lo existente | 6 | Tests antes de cerrar, no degradar, breaking changes, imports, .env.example |
 | Fases y aprobación | 3 | Aprobación explícita, release tags, documentación de fases |
 
-### 2. Código y convenciones (22 reglas)
+### 2. Código y convenciones (23 reglas)
 
 Cómo se escribe el código en todo el ecosistema.
 
 | Sección | Reglas | Qué cubre |
 |---------|--------|-----------|
-| Calidad del código | 3 | Producto profesional, alinear hacia arriba, IA no genera lógica/mensajes |
+| Calidad del código | 4 | Producto profesional, alinear hacia arriba, IA no genera lógica/mensajes, lo que se ve lo compone una función pura fuera de la vista |
 | Nombres | 3 | snake_case, camelCase, negocio en español |
-| Comentarios y docs | 4 | Documentar el "por qué", docstrings, nombres claros |
+| Comentarios y documentación en código | 4 | Documentar el "por qué", docstrings, nombres claros |
 | Python | 4 | Type hints, Pydantic, logging, imports PEP 8 |
 | TypeScript | 4 | strict mode, interfaces, props tipadas, no any |
-| API REST | 4 | Formato respuesta, endpoints, paginación, códigos HTTP y mensajes error |
+| Convenciones de API REST | 4 | Formato respuesta, endpoints, paginación, códigos HTTP y mensajes error |
 
-### 3. Backend, errores y servicios (12 reglas)
+### 3. Backend, errores y servicios (16 reglas)
 
 Cómo se construyen y comunican los servicios.
 
 | Sección | Reglas | Qué cubre |
 |---------|--------|-----------|
-| Errores | 8 | Sin fallbacks silenciosos, contexto, timeouts, env vars fail-fast, logging levels, idempotencia, pipes que ocultan el código de salida |
+| Errores | 12 | Sin fallbacks silenciosos, contexto, timeouts, env vars fail-fast, logging levels, idempotencia, pipes que ocultan el código de salida, subprocesos en modo texto, lo que se apaga se vuelve a encender, la recuperación falla abierto |
 | Arquitectura | 4 | Compartido vs específico, datos en BD, sin Docker |
 
 ### 4. Seguridad (4 reglas)
@@ -78,17 +93,20 @@ Experiencia de usuario y diseño de interfaces.
 |---------|--------|-----------|
 | UX — Diseño de interfaces | 6 | Seleccionable (no texto), TDAH-friendly, listas sobre párrafos, accesibilidad, estados carga/error, responsive |
 
-### 6. Proceso de trabajo (22 reglas)
+### 6. Proceso de trabajo (33 reglas)
 
 Cómo se trabaja con los agentes y el repositorio.
 
 | Sección | Reglas | Qué cubre |
 |---------|--------|-----------|
-| Commits y git | 13 | No --no-verify, un commit = una cosa, cierre por tarea, commit+push proactivo agente, no acumular WIP, push fin de sesión, status inicio/fin, ramas efímeras ≤7 días, revisión tras agentes, declarar repos a tocar, formato, ramas, paridad CI/pre-push en services, `fail-fast: false` en matrices |
-| Validar antes de implementar | 3 | Checklist pre-implementación (5 puntos), gate de lectura + sugerencias, cuándo omitir |
-| Comunicación IA-usuario | 3 | Adaptar al nivel del usuario, preguntar preferencias, resumen «Carlos» en una línea |
-| Pendientes explícitos | 2 | No cerrar con cabos sueltos sin listarlos, cierre real (Definition of Done) |
-| Reglas nacidas de bugs reales | 1 | Bug recurrente → regla nueva con 🐛, protegida contra eliminación |
+| Commits | 13 | No --no-verify, un commit = una cosa, cierre por tarea, commit+push proactivo agente, no acumular WIP, push fin de sesión, status inicio/fin, ramas efímeras ≤7 días, revisión tras agentes, declarar repos **y reservar el plan**, formato, ramas, paridad CI/pre-push en services, `fail-fast: false` en matrices |
+| Validar antes de implementar | 4 | Checklist pre-implementación (5 puntos), gate de lectura + sugerencias, **buscar la ficha antes de empezar**, cuándo omitir |
+| Comunicación IA-usuario | 5 | Adaptar al nivel del usuario, preguntar preferencias (solo lo que es suyo), **de quién es cada decisión**, práctica profesional, resumen «Carlos» en una línea |
+| Selección de modelo (asistente de código) | 5 | Estándar vs avanzado según la tarea, modelo al redactar un plan, en la duda empezar por estándar, **y todo plan dice si es para Opus 5 o Fable 5.1** |
+| ¿Ficha o plan? | 1 | Las 3 señales que suben una ficha a plan; si no cumple ninguna, se arregla y se cierra la ficha |
+| Ubicación de planes | 1 | El plan vive en el repo dueño, no por defecto en `services` |
+| Pendientes explícitos | 3 | No cerrar con cabos sueltos sin listarlos, cierre real (Definition of Done), lo encontrado de paso va a `PENDIENTES.md` |
+| Reglas nacidas de bugs reales | 1 | Bug recurrente → regla nueva con 🐛, protegida contra eliminación (+ candidatas en observación) |
 
 ### Además
 
@@ -98,7 +116,7 @@ Cómo se trabaja con los agentes y el repositorio.
 | Estructura mínima de servicio | Template de archivos + checklist de cierre (6 items) |
 | Comunicación de resultados | Formato estándar y extendido de resumen (1 regla) |
 | Sincronización | Script `sync-global-rules.ps1` para propagar cambios |
-| Planificación | Ubicación de planes, formato obligatorio, cabecera de estado, modelo recomendado, regla de 30 días |
+| Planificación | Ficha o plan, ubicación de planes, formato obligatorio, cabecera de estado, modelo recomendado, regla de 30 días |
 
 ---
 
@@ -112,9 +130,11 @@ Cómo se trabaja con los agentes y el repositorio.
 - ⭐⭐ **Tests en el mismo turno que el cambio.** No esperar a que los pidan. Si tocaste flujo, API o lógica crítica → añade o actualiza tests en ese mismo commit/turno.
 - ⭐⭐⭐ **No dar por cerrado sin validación real.** Se demuestra que funciona, no se asume. El agente debe probar el flujo completo siempre que pueda (curl, scripts, endpoints). Servicios con hardware real (micrófono, audio, GPU, cámara) requieren prueba manual — los mocks no sustituyen una prueba real. Si no puede probar por limitaciones del entorno, debe pedírselo al usuario explícitamente antes de dar la tarea por terminada. _(🐛 origen: STT/TTS pasaban mocks pero fallaban con GPU real en voice-service)_
 - ⭐⭐⭐ **Un test no deja rastro fuera de su directorio temporal.** Ni ficheros, ni variables de entorno, ni bases de datos, ni rutas globales del módulo. Si un test necesita apuntar algo a otro sitio, lo restaura **aunque falle** (`finally` o fixture con `monkeypatch`, nunca al final del cuerpo). Y si el destino real puede no existir, el helper **falla en vez de caer a un default relativo** — ese default acaba siendo el fichero de producción. Comprobación barata: correr la suite dos veces seguidas y mirar si aparece algo nuevo, **incluido lo que ignora `.gitignore`**, que es justo donde no se ve. _(🐛 origen: en una sola jornada, tests escribiendo 5 snapshots de prueba por pasada en el backup **real** de secretos, en el `estado.json` del latido, y en el `database.db` de facturación —1,3 MB dentro del árbol, gitignored, invisible a `git status`—; más una variable del runner filtrándose a los pytest hijos y sesgando sus asserts)_
+- ⭐⭐⭐ **Verificar un mecanismo a mano lo ejecuta de verdad: mira qué deja escrito y hasta cuándo vale.** La regla de arriba cubre los tests; esto es su gemela fuera de pytest. Un comando de comprobación que arranca el mecanismo real —un logon de prueba, un backup de prueba, un envío en modo ensayo— escribe el mismo estado que la ejecución de verdad, y ese estado **le sobrevive**: sigue ahí cuando el comando ya terminó, y lo leen otros. Antes de ofrecer un comando así, y antes de correrlo en el PC de Carlos, hay que saber **qué ficheros toca, quién más los lee y con qué caducidad**; si deja algo puesto, la comprobación no está terminada hasta borrarlo o decir en voz alta cuánto dura. Lo más honesto es que el propio mecanismo distinga el ensayo del uso real: un fichero que se llama «lo que arrancó esta sesión» no debería poder escribirlo un ensayo. _(🐛 origen: 2026-09-04, `agent-verify logon` corre `logon-ecosystem-sequential.ps1 -Mode none` y al terminar escribe `logs\logon-stack-mode.flag` con `mode=none` **aunque la sesión real tenga el ecosistema entero arriba**. Medido: `roberta-watchdog` deja de reparar nada durante **24 h** (`roberta-watchdog.ps1:113-119` sale sin tocar si el modo es `none`/`server`/`game` y el flag tiene menos de 24 h) y el latido deja de comprobar servicios, porque lee `none` y concluye que ese modo no arranca ninguno. Una orden de verificación rutinaria apagando dos guardianes sin avisar, que es justo el patrón que el latido existe para cazar — ficha `LOGON-VERIF-01`)_
 - ⭐⭐⭐ **Verificar que el servicio arranca desde cero después del cambio.** No basta con que funcione en la sesión de desarrollo. Parar el servicio, volver a arrancarlo con `start.bat` y comprobar que todo sigue funcionando. Muchos bugs se esconden en estado que sobrevive en memoria durante el desarrollo. _(🐛 origen: agentes daban OK con estado sucio de sesión anterior)_
 - ⭐⭐⭐ **Un `MagicMock` que llega a una función que abre ficheros no falla: abre el descriptor 1.** `MagicMock` implementa `__index__` y devuelve `1`, así que `os.path.isfile(mock)` da `True` y `open(mock, "rb")` **envuelve la salida estándar** — y al salir del `with`, la cierra. A partir de ahí el proceso revienta al escribir, lejos del test culpable y con un error que no menciona ningún mock. Dos deberes: **(a)** al mockear algo que puede viajar hasta una ruta de fichero, acótalo (`spec=`) o pasa un valor real; **(b)** la función que abre **valida el tipo** — acepta `str` y `os.PathLike`, y rechaza lo que `open()` interpretaría como descriptor (`int`, `bool`, cualquier cosa con `__index__` **en su tipo**, porque un mock responde a cualquier atributo que le pidas a la instancia). El (b) no es cosmético, pero **mide antes de parchear**: en SQLite una columna `TEXT` convierte el entero a `'1'` al guardarlo y ya hace de barrera — una sin afinidad declarada, un campo JSON o una respuesta de API externa, no. _(🐛 origen: 2026-09-03, en facturación un `patch("app.db")` acababa en `_file_a_data_url`, que hacía `open(valor)` sin validar. **El cierre ocurre en las dos plataformas**; lo único que cambia es que pytest en Windows sobrevive y en Linux muere, así que en local no se veía síntoma — medido el 2026-09-03, `os.path.isfile(1)` da `True` también en Windows. Lo que sí discrimina es **qué es el fd 1**: con la captura por descriptor de pytest es un fichero temporal y la función entra al `open`; con `--capture=sys` es una tubería, `isfile` da `False` y sale antes. Se manifestaba como un `INTERNALERROR: OSError: [Errno 9] Bad file descriptor`, escondido desde el 2026-09-01)_
-- ⭐⭐⭐ **Un guardián que no has probado rompiendo lo que vigila es decorativo.** Toda alarma —un check de auditoría, una puerta de CI, un plugin que vigila la suite, un hook— se prueba **escribiendo el mutante**: provoca justo lo que debe cazar y comprueba que salta. Si no salta no tienes una alarma rota, tienes **una que te deja tranquilo**, que es peor que no tener ninguna. El mutante se guarda como test, con el criterio explícito de qué debe salir. _(🐛 origen: cuatro guardianes rotos en dos días, los cuatro en verde. `agent-verify done` daba OK habiendo corrido **cero** tests; `check_stale_plans` medía la fecha que el propio plan se escribía en la cabecera, y había commits dedicados a empujarla; el backup de secretos tenía **45 de 50** copias generadas por tests; y el 2026-09-03 un centinela de descriptores colocado en `pytest_runtest_teardown` salió verde con un `os.close(1)` delante — pytest hace `dup2` al cambiar de fase y el descriptor revive con el mismo `dev`+`ino`, así que ahí es **ciego por diseño**. Los cuatro se destaparon mirando, no fallando)_
+- ⭐⭐⭐ **Un guardián que no has probado rompiendo lo que vigila es decorativo.** Toda alarma —un check de auditoría, una puerta de CI, un plugin que vigila la suite, un hook— se prueba **escribiendo el mutante**: provoca justo lo que debe cazar y comprueba que salta. Si no salta no tienes una alarma rota, tienes **una que te deja tranquilo**, que es peor que no tener ninguna. El mutante se guarda como test, con el criterio explícito de qué debe salir. **Y cuando el guardián nace de un bug real, el mutante ya está escrito: es el commit anterior al arreglo.** Correrlo contra ese commit prueba lo que de verdad pasó —con su forma completa, el orden raro y el camino que no se recorría— y no lo que el autor del guardián imaginó, que suele ser menos retorcido. _(🐛 origen: cuatro guardianes rotos en dos días, los cuatro en verde. `agent-verify done` daba OK habiendo corrido **cero** tests; `check_stale_plans` medía la fecha que el propio plan se escribía en la cabecera, y había commits dedicados a empujarla; el backup de secretos tenía **45 de 50** copias generadas por tests; y el 2026-09-03 un centinela de descriptores colocado en `pytest_runtest_teardown` salió verde con un `os.close(1)` delante — pytest hace `dup2` al cambiar de fase y el descriptor revive con el mismo `dev`+`ino`, así que ahí es **ciego por diseño**. Los cuatro se destaparon mirando, no fallando)_
+- ⭐⭐⭐ **Un verde sin recuento no es un verde.** Toda comprobación que pueda salir bien **sin haber mirado nada** —un verificador, un job de CI, una auditoría, un script de dependencias— dice en su línea final **cuánto ejecutó**, y quien la lee mira ese número antes que el color. Es la hermana de la regla del mutante: el mutante contesta «¿salta cuando hay algo?», el recuento contesta «¿ha llegado a mirar?». Un guardián puede estar intacto y no haber tocado el caso — entonces su verde no dice «está bien», dice **«no sé»**, y son dos cosas distintas que se pintan del mismo color. **Y la lista que vigila se deriva de la fuente de verdad, no se copia:** un guardián que recorre nombres escritos a mano cuenta bien y **mira mal** — su recuento dirá «2 comprobados» mientras el tercero pasa de largo. Vale igual para quien **lee** el resultado: un run verde con jobs saltados, o un `done` que no encontró archivos, no es una verificación, y darlo por tal es la misma falta que escribirlo sin contador. _(🐛 origen: cuatro casos en tres días. `agent-verify done` daba OK habiendo corrido **cero** pytest —`AGVER-01`, cerrado el 2026-09-02: ahora la línea final es `OK — 28 ejecución(es) de pytest`—; el 2026-09-04 ese mismo `done`, ya con contador, salió OK con `archivos: 0` porque el scope sale del árbol de trabajo y el árbol estaba limpio, y aun así se le ofreció a Carlos como verificación de un cambio ya commiteado; el run 477 de facturación salió **success** con **6 de sus 8 jobs `skipped`** —un job saltado no falla—; y un script de `pip-audit` escrito ese día reportó «0 vulnerabilidades» porque hacía `|| echo '{"_error":true}'` y tiraba el JSON: `pip-audit` sale con **1** justo cuando **encuentra** algo)_
 
 ### Commits
 
@@ -130,10 +150,12 @@ Cómo se trabaja con los agentes y el repositorio.
 - ⭐⭐ **Revisar `git status` al inicio y final de sesión.** Al empezar: saber qué quedó pendiente. Al terminar: confirmar que todo está commiteado y pusheado.
 - ⭐⭐ **Ramas efímeras se cierran o mergean en máximo 7 días.** Si una rama lleva más de una semana sin merge o actualización desde el tronco, decidir: merge a `main`/`master` o eliminar. Ramas abandonadas acumulan deuda y divergen del tronco. _(🐛 origen: ramas `chore/ci-github-actions` en services y SALUD abandonadas con commits sin merge)_
 - ⭐⭐ **Después de trabajar con agentes de Cursor, revisar `git status` antes de pasar a otro tema.** Los agentes pueden dejar archivos modificados o nuevos que no recuerdas. Confirmar qué hizo el agente antes de seguir.
-- ⭐⭐⭐ **El agente declara al inicio qué repos/carpetas va a tocar (para evitar dos agentes en el mismo repo).** Al arrancar una tarea no trivial o al redactar un plan, el agente lista en su **primer mensaje** los repositorios y carpetas que modificará (ej. «trabajo en `D:\services` y `D:\projects\sistema-gestion-fiscal`»). No hay lock técnico entre agentes de Cursor: es una **convención de declaración explícita** para que Carlos no lance otro agente en esos repos hasta que el primero cierre (commit+push). Si al empezar el agente encuentra cambios ajenos sin commitear en su repo objetivo, **avisa antes de tocar** y commitea solo los archivos de su bloque. _(🐛 origen: pérdida de ediciones en `servicio-compras`/`servicio-facturacion` por otro agente commiteando en paralelo en el mismo repo)_
+- ⭐⭐⭐ **El agente declara al inicio qué repos/carpetas va a tocar — y, si va a implementar un plan, reserva también el plan.** Al arrancar una tarea no trivial o al redactar un plan, el agente lista en su **primer mensaje** los repositorios y carpetas que modificará (ej. «trabajo en `D:\services` y `D:\projects\sistema-gestion-fiscal`»). No hay lock técnico entre agentes — **ni entre los de Cursor, ni entre sesiones de Claude Code**, que además pueden correr en máquinas distintas y no se ven el `git status` la una a la otra: es una **convención de declaración explícita** para que Carlos no lance otro agente en esos repos hasta que el primero cierre (commit+push). Si al empezar el agente encuentra cambios ajenos sin commitear en su repo objetivo, **avisa antes de tocar** y commitea solo los archivos de su bloque. **Declarar el repo no basta cuando el trabajo es un `PLAN_*.md`:** dos agentes en el mismo repo se pisan ficheros y se nota enseguida; dos agentes en el mismo **plan** escriben ficheros distintos, no chocan en nada, e implementan lo mismo dos veces sin que se vea hasta el merge. Así que quien empieza a implementar un plan escribe en su cabecera **quién lo implementa y desde cuándo**, y quien va a empezar mira esa línea antes. _(🐛 origen: pérdida de ediciones en `servicio-compras`/`servicio-facturacion` por otro agente commiteando en paralelo en el mismo repo. **Y el 2026-09-04, dos sesiones de Claude implementaron el mismo día 2 de `PLAN_LATIDO_ECOSISTEMA.md` en paralelo** —una en `master`, otra en una rama—: al juntarlas, **7 conflictos**, dos de ellos `add/add` con el mismo script escrito dos veces, y una tarde de trabajo duplicado que hubo que tirar. Ninguna de las dos declaró nada; ficha `SESION-PAR-01`)_
 
 ### Errores
 
+- ⭐⭐⭐ **Lo que una feature apaga, lo vuelve a encender; y si lo encuentra ya apagado, lo dice.** Un servicio parado es una **preferencia** del usuario y se respeta; una **protección caída es un riesgo** y no se hereda en silencio. Nada de adoptar «ya estaba apagado» como lo normal: se deja constancia de por qué no es nuestro y se **avisa donde la persona lo lea**, que es la única forma de que se entere. _(🐛 origen: `MODOJUEGO-11`, 2026-09-06 — una salida mala dejó Defender apagado, la entrada siguiente lo guardó como `paused_by_us: false`, la salida se fue por `skip` borrando el sidecar, y el PC se quedó **sin antivirus** hasta que se encendió a mano. Las dos mitades eran correctas por separado)_
+- ⭐⭐⭐ **Un mecanismo de recuperación falla ABIERTO.** Cualquier candado, condición o comprobación que decida **si se restaura algo** tiene que actuar ante la duda, no abstenerse: restaurar de más es un susto, no restaurar es **quedarse roto sin saberlo**. Y si un candado necesita una señal para saber si le toca —un fichero-marca, un flag, una variable— y esa señal puede faltar, **el candado sobra**: su fallo es peor que lo que evita. _(🐛 origen: al arreglar `MODOJUEGO-12`, 2026-09-06, se descartó justo ese candado — habría convertido «salir del modo juego antes de tiempo», que se arregla volviendo a entrar, en «no volver nunca»)_
 - ⭐⭐⭐ **Sin fallbacks silenciosos.** Si algo falla, el error debe ser visible: log, excepción, respuesta HTTP con código de error. Nunca tragarse un error con `except: pass` o devolver un valor por defecto sin avisar. _(🐛 origen: except:pass en text_flow del orchestrator y en monitoreo de fiscal)_
 - ⭐⭐ **Errores con contexto en logs.** Todo error relevante se registra con información suficiente para depurar (identificador de petición, usuario si aplica, operación). Logging estructurado, no solo mensajes sueltos.
 - ⭐ **Errores en español.** Los mensajes de error orientados al usuario van en español. Logs técnicos pueden ir en inglés si el contexto lo requiere.
@@ -141,7 +163,9 @@ Cómo se trabaja con los agentes y el repositorio.
 - ⭐⭐⭐ **Variables de entorno obligatorias deben fallar al arrancar si faltan.** Nunca `os.getenv("SECRET_KEY")` sin default seguro ni validación. Si la variable es requerida, el servicio debe lanzar un error claro al iniciar (ej. `ValueError: Falta variable de entorno SECRET_KEY`), no fallar críticamente minutos después con un `NoneType`. _(🐛 origen: NoneType por DATABASE_URL_READ_ONLY faltante en SALUD)_
 - ⭐⭐ **Niveles de logging consistentes.** `ERROR`: algo falló y requiere atención (petición fallida, servicio caído, dato corrupto). `WARNING`: algo inesperado pero el sistema se recuperó (retry exitoso, fallback usado, valor por defecto aplicado). `INFO`: eventos normales relevantes (servicio arrancado, petición procesada, migración aplicada). `DEBUG`: detalle técnico solo para desarrollo. No usar `INFO` para errores ni `ERROR` para cosas que no lo son.
 - ⭐⭐⭐ **Operaciones que el usuario puede repetir accidentalmente deben ser idempotentes.** Si la misma acción llega dos veces (doble clic, retry, red lenta), el servidor detecta el duplicado y devuelve la respuesta original sin ejecutar dos veces. Implementar con ventana temporal, idempotency key, o constraint en BD según el caso. _(🐛 origen: doble registro de Omeprazol en SALUD)_
+- ⭐⭐⭐ **Si escribes varias cosas en otro servicio, compensa las que ya creaste cuando una falle.** Una operación que crea N recursos remotos (avisos, reglas, tareas) **no es atómica**: si la tercera llamada falla, las dos primeras ya existen y nadie las va a limpiar. La forma correcta tiene cuatro partes, y las cuatro importan: (1) recordar los ids creados; (2) en el `except`, **borrar los que ya se crearon**; (3) si la compensación también falla, registrarlo **nombrando el id** —queda huérfano y hay que poder encontrarlo—; (4) **relanzar**, para que quien llamó sepa que no se hizo. Y lo que no se pudo limpiar no se queda en el log: sube como **advertencia en la respuesta**, porque es el usuario quien tiene que saber que le quedaron avisos sueltos. Aplica a escrituras múltiples, no a un `DELETE` suelto — borrar ya *es* la compensación. _(Implementado en `vehicle-service/app/obligaciones.py` (`_sincronizar_reglas`) y `calendar-service/app/services/citas.py` (`_crear_reglas_para_cita`), que son hoy los dos únicos sitios del repo que crean varios recursos en otro servicio — medido con AST el 2026-09-07. Copiar de ahí antes que reinventarlo)_
 - ⭐⭐⭐ **Un comando cuyo éxito importa no se canaliza.** `cmd | tail`, `| head` o `| grep` devuelven el código de salida del **último proceso del pipe**, no el del comando. Un `git push` rechazado detrás de un `| tail -40` sale con **0**, y quien lo lea —persona o agente— reporta «subido» en falso. Si hace falta recortar la salida: guardar primero (`cmd > fichero`) o `set -o pipefail`. _(🐛 origen: 2026-09-03, `git push origin master | tail -40` dio éxito con el push rechazado por ref bloqueada)_
+- ⭐⭐⭐ **Leer la salida de un subproceso en modo texto exige decir qué hacer con un byte que no decodifica.** `text=True` sin `errors=` decodifica **estricto** con la codificación del sistema —cp1252 en Windows—, así que un solo acento levanta `UnicodeDecodeError` **en el padre**, y lo hace al final: el hijo ya hizo el trabajo y el informe se pierde entero. Siempre `errors="replace"`. El **códec**, en cambio, es un juicio por llamada y no un automatismo: si el hijo es Python nuestro y se captura su salida, UTF-8 en los dos extremos (`PYTHONIOENCODING` allá, `encoding="utf-8"` acá); si es una herramienta nativa de Windows (`powershell`, `netstat`, `manage-bde`, `pg_dump`), se mantiene el códec del sistema, porque imponerles UTF-8 es la misma avería del revés. _(🐛 origen: 2026-09-05, `repro_rotacion_dos_procesos.py` completó sus cuatro mediciones y reventó al imprimirlas; guardián con mutante en `scripts/tests/test_subprocess_encoding.py`)_
 
 ### Arquitectura
 
@@ -159,13 +183,15 @@ Cómo se trabaja con los agentes y el repositorio.
   - Orden de implementación si hay varios pasos (ej. backend → contrato → frontend → tests)
   - Dudas → preguntar antes de tocar código si la spec no es suficiente
 - ⭐⭐ **Gate de lectura antes de codificar (tareas no triviales):** Al pedir implementación, comprobar si ya está **todo lo necesario** resuelto (decisión de diseño, plan/contrato alineado con código, migraciones, entorno, criterios de aceptación). Si falta algo o hay **opciones equiparables**, **no asumir en silencio**: en el mismo turno, resumir qué está claro, qué falta y **preguntar** o proponer la opción recomendada con breve motivo. Ofrecer **sugerencias de mejora** cuando aporten (riesgo, coherencia con `docs/`, deuda, tests) — breves, no un informe. En tareas triviales (typo, rename local, ajuste de formato) no aplica el ritual completo.
+- ⭐⭐⭐ **Antes de empezar un encargo, buscar su ficha en `PENDIENTES.md` y leerla.** Se busca por las palabras del **síntoma** (`broken_doc_links`, `worktree`, el nombre de la función), nunca por el ID que uno está a punto de inventar, y se hace **antes de escribir código** — no antes de commitear, que es cuando ya no sirve. Si la ficha existe, se trabaja sobre ella: se cierra **esa**, no se abre otra. Dos IDs para una misma cosa es peor que ninguno, porque el viejo se queda abierto para siempre y el nuevo nace sin historia. Y el ahorro no es solo evitar el duplicado: una ficha ya escrita suele traer **la medición hecha y las opciones planteadas**, así que no leerla es rehacer trabajo que ya estaba. Vale igual para el encargo que llega por chat: si nace de algo que destapó otra tanda, casi seguro que tiene ficha. _(🐛 origen: dos veces en dos días. El 2026-09-09 salieron `CLAUDEREFS-01` y `CLAUDEREF-01` de dos sesiones distintas el mismo día sobre exactamente el mismo agujero, y hubo que fundir una en otra. El 2026-09-10 se abrió `DOCLINK-WT-01` para un defecto que ya era `AUDITWT-01` —abierta el día anterior, y que además ya planteaba las dos opciones de arreglo entre las que se acabó eligiendo—, y costó renombrar 11 referencias en 5 ficheros. El primero es concurrencia y el grep solo lo habría cazado a medias; el segundo lo habría evitado del todo)_
 - ⭐ Solo se omite si el usuario dice explícitamente "implementa directamente sin validar".
 
 ### Comunicación IA-usuario
 
 - ⭐ **Adaptar la comunicación al nivel del usuario.** Si no entiende algo (término técnico, opciones), reformular en lenguaje más claro. Si indica que no entiende, simplificar sin que tenga que pedirlo dos veces.
-- ⭐⭐ **Si hay varias formas de hacer algo** (UX, flujo, criterios, diseño), preguntar cuál prefiere el usuario en lugar de elegir por él. No dar por hecho preferencias no expresadas.
+- ⭐⭐ **Si hay varias formas de hacer algo** (UX, flujo, criterios de producto, diseño), preguntar cuál prefiere el usuario en lugar de elegir por él. No dar por hecho preferencias no expresadas. **Ojo al alcance:** esto es para lo que depende de su gusto o de su negocio, **no** para una duda técnica con respuesta correcta — esa la decide el agente (regla siguiente).
 - ⭐⭐ **Asesoramiento de práctica profesional (agentes Cursor / desarrollo).** Cuando el usuario pide algo concreto (integración, paquete, flujo, producto de un fabricante, algo «muy específico» de un sector), además de cumplir lo pedido, aportar **brevemente** cómo suele hacerse en la industria si hay una práctica estándar, un paso habitual que falta o un riesgo frecuente — sin sustituir su decisión ni convertir la respuesta en un tutorial. **Alcance:** agentes IDE (Tim, Cursor) al codificar o diseñar contigo; **no** aplica como bloque de prompt en **Roberta voz** (modelo local pequeño: datos y FAQ vía tools/`knowledge_query`; ver R6 en `PLAN_ROBERTA_WEB_Y_CONOCIMIENTO.md`). En producto con IA/voz: **datos verificables** (precios, estados, clientes, specs) solo vía tools/código.
+- ⭐⭐⭐ **Una decisión es del usuario solo si depende de algo que únicamente él sabe o puede:** dinero, hardware, un dato de negocio, una credencial, qué ve en la pantalla, o qué quiere que haga el producto. Todo lo demás —si la respuesta correcta se puede sacar del código, de una medición o del estándar del oficio— **es del agente**: se decide, se ejecuta, y se le cuenta en una línea qué se decidió y por qué. **«No sé cuál es mejor» nunca es motivo para pasársela: es motivo para medirlo.** Etiquetar una duda técnica como «decisión de Carlos» la deja parada indefinidamente y encima le pide un juicio que no puede dar. _(🐛 origen: 2026-09-05, la ficha `LOGS-DISCO-02` —qué nivel fijar en el root logger— se marcó «decisión de Carlos» y estuvo un día parada; no era un trade-off de producto sino un montaje mal hecho con respuesta estándar: el logger decide qué merece registrarse y el handler con qué umbral se escribe, así que dejar el root en `WARNING` filtra en la capa equivocada)_
 - ⭐⭐ **«Respuesta para Carlos» — resumen en una línea primero.** Si el usuario pide explícitamente una **respuesta para Carlos** (u otra fórmula clara con el mismo sentido: p. ej. «solo una línea», «resumen ultra breve para Carlos»), **empezar** la respuesta con **una sola línea** clara y concisa con lo esencial; solo después, si sigue siendo útil, añadir detalle en **listas muy cortas** o bloques breves — evitar muros de párrafo. _(Motivo: TDAH / no perderse en demasiado texto.)_
 
 ### Selección de modelo (asistente de código)
@@ -176,6 +202,30 @@ En el IDE (p. ej. Cursor), elegir entre **modelo estándar vs avanzado** (ej. So
 - ⭐ **Tareas complejas** — arquitectura, refactors que tocan varios archivos (p. ej. 3+), depuración con hardware real, planes con decisiones de diseño: preferir **modelo avanzado**.
 - ⭐⭐ **Al pedir redactar un plan** (`PLAN_*.md`, «hazme un plan», «planifica», etc.): clasificar el plan (trivial/media/compleja) según `docs/BITACORA_MODELOS_CURSOR.md` § Planificación; **decir siempre al inicio** qué modelo conviene para redactarlo (estándar vs avanzado; en complejo evitar Auto); al escribir el archivo, incluir en cabecera `> Modelo recomendado: … | Motivo: …`. Ver `.cursor/rules/model-recommendation.mdc`.
 - ⭐ **En caso de duda**, empezar con modelo estándar. Si el agente se atasca, repite errores o el resultado es claramente pobre, pasar a modelo avanzado.
+- ⭐⭐ **Todo plan dice con qué modelo conviene implementarlo: `Opus 5` o `Fable 5.1`.** Va en la
+  línea `> Modelo recomendado:` de la cabecera, con el motivo. No es burocracia: los dos cuestan y se
+  comportan distinto, y elegir mal se paga en dinero o en calidad. Criterio, por **forma de la
+  tarea**:
+
+  | Elige | Cuándo | Por qué |
+  |-------|--------|---------|
+  | **Fable 5.1** (`claude-fable-5-1`) | Trabajo **largo y autónomo**: implementar de una pasada un sistema bien especificado, un cambio que cruza muchos ficheros, depurar con evidencia contradictoria, revisar código de un repo entero, delegar en subagentes | Es el modelo más capaz de Anthropic para razonamiento exigente y trabajo agéntico de recorrido largo. **Cuesta el doble** ($10/$50 por millón de tokens frente a $5/$25) y **sus turnos pueden durar muchos minutos** — quince en una sola petición es normal en tareas duras |
+  | **Opus 5** (`claude-opus-5`) | **El resto, y por defecto.** Tarea acotada, iteración con alguien delante, cambios de un fichero, documentación, cualquier cosa donde quieras intervenir a menudo | La mitad de precio, y tiene modo rápido. En este repo es lo que se usa el 90 % del tiempo |
+
+  Dos avisos que salen de la guía del propio modelo y no de la intuición: a **Fable 5.1** hay que
+  **darle el porqué, no solo la orden** —rinde mejor cuando entiende la intención— y hay que
+  **decirle qué NO debe hacer**, porque a veces toma acciones adyacentes que nadie pidió (crear ramas
+  de respaldo, por ejemplo). Y sus turnos largos hacen que un plan pensado para «lo miro cada dos
+  minutos» encaje mal.
+
+  _(Decisión Carlos 2026-09-05. Los planes anteriores a esa fecha llevan el vocabulario viejo
+  —`estándar` / `avanzado`— y se actualizan **uno a uno, cuando alguien los toque**: elegir entre los
+  dos modelos es un juicio por plan, no un reemplazo de texto, así que no hay migración en masa.
+  `scripts/normalize_plan_headers.py` ya no reintroduce el viejo (ficha `PLANMOD-01`, cerrada el
+  2026-09-08): al plan al que le falta la línea le pone `Opus 5` —el default de esta tabla— con el
+  motivo marcado `SIN REVISAR`, para que se vea que lo puso un script y no una persona; los planes
+  que ya tienen la línea no los toca. Los pendientes de decidir salen con
+  `grep -rn "SIN REVISAR" docs/PLAN_*.md`.)_
 - Referencia operativa (sin ampliar criterios aquí): `docs/BITACORA_MODELOS_CURSOR.md`.
 
 ### No romper lo existente
@@ -192,6 +242,7 @@ En el IDE (p. ej. Cursor), elegir entre **modelo estándar vs avanzado** (ej. So
 - ⭐⭐ **Toda aplicación se construye como producto profesional listo para abrir al público.** Desde el primer commit: diseño cuidado, UX pensada, mensajes claros, flujos completos. No se construyen prototipos "que ya se mejoran después". Si no está listo para que lo use un usuario real, no se cierra la fase.
 - ⭐⭐ **Alinear hacia arriba, nunca hacia abajo.** Si hay inconsistencia entre dos implementaciones de lo mismo (fórmulas, lógica, flujos), mejorar la peor hasta el nivel de la mejor. Nunca empobrecer la buena para "hacer coincidir". En resumen: no empeorar lo que ya está bien.
 - ⭐⭐⭐ **La lógica de negocio, confirmaciones y mensajes al usuario los construye el código, no el modelo de IA.** La IA interpreta y extrae datos — el código decide qué hacer y qué decir. Ningún mensaje visible al usuario debe ser texto generado libremente por un LLM sin control del código. _(🐛 origen: IA inventando consejos de salud no solicitados en SALUD)_
+- ⭐⭐⭐ **Lo que una persona ve lo compone una función pura fuera de la vista; la vista sólo lo coloca.** Nada de decidir dentro de la ventana qué campo pintar, cuándo refrescar o qué avisos merecen enseñarse: eso va en una función sin dependencias de UI, que sí se puede probar. **Y el guardián tiene que mirar donde se ve**, no donde es cómodo — una suite verde sobre la lógica no dice nada de la pantalla. _(🐛 origen: tres bugs el mismo día, 2026-09-06, con 116+ tests en verde: la ventana pintaba la etiqueta vieja, el panel no releía el flag, y el panel filtraba justo el aviso de que el PC estaba sin antivirus. Detalle, alcance y guardián propuesto: `VISTA-MUDA-01` en [`PENDIENTES.md`](PENDIENTES.md))_
 
 ### Seguridad en código
 
@@ -356,7 +407,23 @@ Pendiente: Actualizar los 2 consumidores para usar el token en header
 
 ### Reglas nacidas de bugs reales
 
-- ⭐⭐⭐ **Cuando se detecta un bug o problema recurrente no cubierto por ninguna regla, crear una regla nueva que lo prevenga.** Marcarla con `_(🐛 origen: descripción del bug)_` para distinguirla de las teóricas. Las reglas con 🐛 son las más importantes — no se eliminan ni fusionan sin justificación explícita.
+- ⭐⭐⭐ **Cuando se detecta un bug o problema recurrente no cubierto por ninguna regla, crear una regla nueva que lo prevenga.** Marcarla con `_(🐛 origen: descripción del bug)_` para distinguirla de las teóricas. Las reglas con 🐛 son las más importantes — no se eliminan ni fusionan sin justificación explícita. **Y el disparador va en las dos direcciones:** en cuanto pienses «esto ya lo he visto», mira **Candidatas en observación** antes de seguir — si el patrón está aparcado ahí, ya tienes las dos evidencias y toca **promoverlo ahora**, no apuntarlo otra vez; y si es la primera vez que lo ves, se aparca ahí con su `Revisar: AAAA-MM-DD`. Sin ese paso la tabla se llena y nunca asciende nadie, que es lo que pasaba hasta el 2026-09-10.
+
+#### Candidatas en observación
+
+Un caso solo no hace una regla; olvidado tampoco vuelve a aparecer. Aquí se aparcan los patrones vistos **una vez**,
+con la condición escrita para promoverlos. Si el patrón se repite, se escribe como regla **con las dos evidencias**.
+Si pasan meses sin repetirse, se borra la fila y ya está — eso también es información.
+
+**Cada fila lleva `Revisar: AAAA-MM-DD`, y no es decorativo.** Hasta el 2026-09-10 esta tabla era un aparcamiento de
+**solo escritura**: nada en `scripts/` la miraba (medido), así que un patrón aparcado no lo releía nadie y la promoción
+no llegaba nunca. Ahora `audit.py --check revisiones_vencidas` saca la fila el día que toca, igual que hace con las
+fichas de `PENDIENTES.md`, y **falla cerrado**: una candidata sin fecha se denuncia igual que una vencida, porque si no
+bastaría con olvidarse de ponerla para que el guardián no la viera.
+
+| Candidata | Qué pasó (una vez) | Pasa a regla si… |
+|-----------|--------------------|------------------|
+| **La etiqueta de un aviso automático describe cómo está declarada la dependencia, no para qué se usa.** | 2026-09-04, ficha `FACT-DEPS-01`: dependabot marcaba como **Development** las siete alertas de `electron` en `navegador/`, porque está en `devDependencies`. Pero ahí electron no es una herramienta de build: es el **runtime de la app**, y la app hace `loadURL` de una web de terceros — contenido remoto en el renderer, que es justo lo que esos CVE necesitan. Cuatro de las siete eran *use-after-free*, y el bump a electron 44 arregló de paso un crash real (`0xC0000005`) que tiraba la app cada día. La etiqueta invitaba a no mirar, y nadie miró en meses. | vuelva a aparecer una clasificación automática —dependabot, un linter, un escáner— que decida la gravedad por **dónde está declarada** una dependencia y no por **cómo se usa**. Con el segundo caso pasa a regla en § Seguridad en código. **Revisar: 2026-12-04** (tres meses desde que se aparcó: o hay segundo caso, o se borra). |
 
 **IMPORTANTE:** El formato estándar (`✅ PARA QUÉ SERVÍA ESTO...`) se configura también en **Cursor Settings → Rules for AI** (User Rule global) para que aplique a TODOS los proyectos. Texto exacto para pegar en Cursor Settings:
 
@@ -377,6 +444,22 @@ Esto propaga los cambios a todos los proyectos del ecosistema.
 ---
 
 ## Planificación
+
+### ¿Ficha o plan?
+
+- ⭐⭐ **Decidir si una ficha merece plan es del agente, no de Carlos.** Una ficha de
+  [`PENDIENTES.md`](PENDIENTES.md) sube a `PLAN_*.md` si cumple **una** de estas tres señales:
+  **(1)** toca **2+ servicios** o cambia un contrato compartido; **(2)** necesita **flag,
+  migración o cutover** — o sea, hay día D y vuelta atrás; **(3)** hay una **decisión de producto
+  abierta** que solo puede tomar Carlos. Si no cumple ninguna, **no se escribe plan**: se arregla
+  y se cierra la ficha. El agente lo decide, lo dice **en una línea** al empezar, y sigue. Carlos
+  puede pedir plan cuando quiera —eso no cambia—, pero la ausencia de petición no significa «sin
+  plan»: significa que la señal la evalúa el agente. _(Origen: 2026-09-08. El criterio existía y
+  se aplicaba —`GITWARN-01`, `SECRETFALL-01` y `PROFILEAUTH-01` se cerraron sin plan, y era lo
+  correcto—, pero **no estaba escrito en ningún sitio**: el único disparador documentado era que
+  lo pidiera Carlos (`.cursor/rules/plan-por-capas.mdc:8`). Eso contradecía la regla ⭐⭐⭐ de
+  § Comunicación IA-usuario — «¿esto necesita plan?» no depende de dinero, hardware, un dato de
+  negocio ni una credencial, luego es del agente.)_
 
 ### Ubicación de planes
 
@@ -400,7 +483,7 @@ Todo plan activo debe empezar con estas líneas (blockquote):
 ```
 > Estado: ACTIVO | Creado: YYYY-MM-DD | Última revisión: YYYY-MM-DD
 > Validado por Carlos: [ ]
-> Modelo recomendado: [estándar | avanzado] | Motivo: [razón breve]
+> Modelo recomendado: [Opus 5 | Fable 5.1] | Motivo: [razón breve]
 > Ejecución: [OK Auto | mejor avanzado | avanzado (no Auto)]
 > Repos: [services | fiscal | SALUD | …] | Primario: [motivo breve si multi]
 ```
@@ -410,7 +493,7 @@ La línea de validación va **justo después** de la cabecera de estado; la de m
 ```
 > Estado: ACTIVO | Creado: YYYY-MM-DD | Última revisión: YYYY-MM-DD
 > Validado por Carlos: [ ]
-> Modelo recomendado: avanzado | Motivo: arquitectura multi-servicio con trade-offs
+> Modelo recomendado: Fable 5.1 | Motivo: cambio que cruza 21 consumidores, de una pasada
 > Ejecución: avanzado (no Auto)
 > Repos: services, fiscal | Primario: services — tools voz; fiscal proxy UI
 ```
@@ -435,7 +518,7 @@ Todo archivo `PLAN_*.md` debe contener estas secciones:
 
 1. **Cabecera de estado** — Línea `> Estado: ACTIVO | Creado: ... | Última revisión: ...`
 2. **Validado por Carlos (casilla)** — Línea `> Validado por Carlos: [ ]` o `> Validado por Carlos: [x]`.
-3. **Modelo recomendado** — Línea `> Modelo recomendado: [estándar | avanzado] | Motivo: ...` (la pone el agente al redactar; ver § Selección de modelo).
+3. **Modelo recomendado** — Línea `> Modelo recomendado: [Opus 5 | Fable 5.1] | Motivo: ...` (la pone el agente al redactar; **con el nombre del modelo, no «estándar/avanzado»** — ver § Selección de modelo para el criterio).
 4. **Ejecución** — Línea `> Ejecución: [OK Auto | mejor avanzado | avanzado (no Auto)]` (con qué chat implementar; ver `BITACORA_MODELOS_CURSOR.md` § Ejecución).
 5. **Repos** — Línea `> Repos: …` (repo dueño; si multi, primario + motivo). Ver `plan-ubicacion-repo.mdc`.
 6. **Objetivo** — Qué se quiere conseguir (1-2 frases).
@@ -465,11 +548,17 @@ Opcional:
 
 ⭐⭐ Al pedir un plan, el agente trabaja **por capas** y **pregunta antes de pasar a la siguiente** (regla `.cursor/rules/plan-por-capas.mdc`):
 
-1. **Redactar** — siempre
-2. **Expandir** — media/compleja
-3. **Sorpresas código** — compleja (o media con API/servicios)
-4. **Rollback / día D** — cutover, flags, multi-servicio o breaking
-5. **Tests frágiles** — si hay tests/mocks acoplados al cambio
+En este orden. **El número es un identificador fijo, no el orden** — los planes viejos citan «capa 3»
+queriendo decir sorpresas, así que no se renumeran:
+
+1. Capa **1 · Redactar** — siempre
+2. Capa **3 · Sorpresas código** — compleja (o media con API/servicios)
+3. Capa **5 · Tests frágiles** — si hay tests/mocks acoplados al cambio
+4. Capa **2 · Expandir** — media/compleja
+5. Capa **4 · Rollback / día D** — cutover, flags, multi-servicio o breaking
+
+Las dos pasadas de código (3 y 5) van juntas y primero: expandir tareas que luego se caen es trabajo
+perdido, y el rollback se diseña al final, cuando ya sabes qué hay.
 
 Atajos del usuario: «expandelo», «sorpresas», «rollback», «tests que fallan», o «todas las capas» para saltar los gates. Planes **triviales**: solo capa 1 salvo que pida más. Tras las capas → validar casilla; **no implementar** con `[ ]`.
 
