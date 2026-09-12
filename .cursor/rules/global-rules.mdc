@@ -19,13 +19,13 @@ Aplican a **todos** los proyectos del ecosistema (`D:\services\`, `D:\projects\`
 > Las reglas con origen en bugs reales detectados en el ecosistema son automáticamente ⭐⭐⭐.
 > Las que afectan seguridad o pérdida de datos son ⭐⭐⭐.
 
-**Resumen: 42 ⭐⭐⭐ · 40 ⭐⭐ · 20 ⭐ · 32 con 🐛 origen documentado (102 en total)**
+**Resumen: 42 ⭐⭐⭐ · 41 ⭐⭐ · 20 ⭐ · 32 con 🐛 origen documentado (103 en total)**
 
 ---
 
 ## Índice de reglas por sector
 
-> **Total: 102 reglas** en 6 sectores + comunicación de resultados (32 marcadas con 🐛 — nacidas de bugs reales). Última actualización: 2026-09-10.
+> **Total: 103 reglas** en 6 sectores + comunicación de resultados (32 marcadas con 🐛 — nacidas de bugs reales). Última actualización: 2026-09-12.
 > Tras 11 fusiones de reglas duplicadas/solapadas, se eliminaron 16 bullets sin perder conceptos.
 >
 > **Recontado a mano el 2026-09-04 y el índice estaba mal:** decía 84 y hay 93. Faltaban dos secciones enteras
@@ -68,14 +68,14 @@ Cómo se escribe el código en todo el ecosistema.
 | TypeScript | 4 | strict mode, interfaces, props tipadas, no any |
 | Convenciones de API REST | 4 | Formato respuesta, endpoints, paginación, códigos HTTP y mensajes error |
 
-### 3. Backend, errores y servicios (16 reglas)
+### 3. Backend, errores y servicios (17 reglas)
 
 Cómo se construyen y comunican los servicios.
 
 | Sección | Reglas | Qué cubre |
 |---------|--------|-----------|
 | Errores | 12 | Sin fallbacks silenciosos, contexto, timeouts, env vars fail-fast, logging levels, idempotencia, pipes que ocultan el código de salida, subprocesos en modo texto, lo que se apaga se vuelve a encender, la recuperación falla abierto |
-| Arquitectura | 4 | Compartido vs específico, datos en BD, sin Docker |
+| Arquitectura | 5 | Compartido vs específico, datos en BD, sin Docker, defensas iguales aunque el stack no lo sea |
 
 ### 4. Seguridad (4 reglas)
 
@@ -173,6 +173,7 @@ Cómo se trabaja con los agentes y el repositorio.
 - ⭐⭐ **Funcionalidad específica → su proyecto.** Lógica de negocio que solo tiene sentido en un proyecto queda en ese proyecto.
 - ⭐⭐⭐ **Nada del ecosistema se ejecuta en Docker.** Los servicios arrancan con `start.bat` / `start.sh` sobre el intérprete del repo (`.conda-env` o el `.venv` del servicio). Un agente **no introduce Docker** ni propone «arranca Docker Desktop» como paso de una tarea — ni siquiera para reproducir un bug: si hace falta un entorno distinto al del PC, ese sitio es el CI. Única excepción viva y documentada: `D:\projects\trading` lleva `Dockerfile` y `docker-compose.yml` en git. _(Decisión Carlos 2026-09-03. Ya constaba como convención en `docs/ECOSYSTEM.md:81` —«Todo se ejecuta con start.bat / start.sh. Sin Docker»— pero no como regla, y por eso los agentes seguían proponiéndolo)_
 - ⭐⭐⭐ **Los datos del usuario se persisten en base de datos, no en el navegador.** No usar `localStorage`, `sessionStorage` ni cookies como almacenamiento principal de datos de negocio. El navegador es para preferencias de UI (tema, idioma, sidebar abierto/cerrado) y tokens de sesión — los datos reales van a la BD siempre. _(🐛 origen: datos de negocio en localStorage en SALUD que se perdían al limpiar caché)_
+- ⭐⭐ **Se unifican las defensas, no el framework.** Un servicio que vive en otro stack —fiscal es Flask + `requests`; `services` es FastAPI + `httpx` + `pydantic-settings`— **no se reescribe para igualarlo**: reescribir 15 servicios Flask con validez legal detrás es mucho coste por nada que hoy esté roto. Lo que sí tiene que ser igual en todos, sea cual sea el stack, son las piezas que no dependen de él: timeout en toda llamada HTTP, logs al `logging-service`, secretos del almacén central, no repetir el mismo fallo en el log (`shared/net_log.py`), guardianes en `audit.py`, y **ningún módulo copiado a mano entre repos** — se comparte, o hay un guardián que avisa cuando las copias se separan. **Lo nuevo nace con el stack estándar** (§ Stack estándar); lo viejo se queda como está mientras funcione, y pasa al estándar sólo cuando le toque un refactor grande. La pasada trimestral de `RETRO-01` mide las defensas, no el framework. _(Decisión Carlos 2026-09-11. Medido antes de decidir: fiscal ya pone timeout en el 99,2 % de sus llamadas y logea al mismo sitio — el framework no era el problema; `facturae_extract.py` copiado tres veces e idéntico sí, `DUPMOD-01`)_
 
 ### Validar antes de implementar
 
@@ -287,7 +288,7 @@ En el IDE (p. ej. Cursor), elegir entre **modelo estándar vs avanzado** (ej. So
 
 ### Proyectos existentes
 
-No se migran retroactivamente. Cuando un proyecto existente haga un refactor importante, se actualiza al stack estándar en ese momento.
+No se migran retroactivamente. Cuando un proyecto existente haga un refactor importante, se actualiza al stack estándar en ese momento. Lo que sí se exige desde el primer día, tenga el stack que tenga, son las **defensas transversales** — ver «Se unifican las defensas, no el framework» en § Arquitectura.
 
 > **No se usa Docker en ningún proyecto del ecosistema.** Los servicios se ejecutan directamente con `start.bat`/`start.sh`.
 
