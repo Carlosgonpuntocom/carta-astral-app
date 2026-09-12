@@ -19,13 +19,13 @@ Aplican a **todos** los proyectos del ecosistema (`D:\services\`, `D:\projects\`
 > Las reglas con origen en bugs reales detectados en el ecosistema son automáticamente ⭐⭐⭐.
 > Las que afectan seguridad o pérdida de datos son ⭐⭐⭐.
 
-**Resumen: 42 ⭐⭐⭐ · 41 ⭐⭐ · 20 ⭐ · 32 con 🐛 origen documentado (103 en total)**
+**Resumen: 43 ⭐⭐⭐ · 41 ⭐⭐ · 20 ⭐ · 33 con 🐛 origen documentado (104 en total)**
 
 ---
 
 ## Índice de reglas por sector
 
-> **Total: 103 reglas** en 6 sectores + comunicación de resultados (32 marcadas con 🐛 — nacidas de bugs reales). Última actualización: 2026-09-12.
+> **Total: 104 reglas** en 6 sectores + comunicación de resultados (33 marcadas con 🐛 — nacidas de bugs reales). Última actualización: 2026-09-12.
 > Tras 11 fusiones de reglas duplicadas/solapadas, se eliminaron 16 bullets sin perder conceptos.
 >
 > **Recontado a mano el 2026-09-04 y el índice estaba mal:** decía 84 y hay 93. Faltaban dos secciones enteras
@@ -93,7 +93,7 @@ Experiencia de usuario y diseño de interfaces.
 |---------|--------|-----------|
 | UX — Diseño de interfaces | 6 | Seleccionable (no texto), TDAH-friendly, listas sobre párrafos, accesibilidad, estados carga/error, responsive |
 
-### 6. Proceso de trabajo (33 reglas)
+### 6. Proceso de trabajo (34 reglas)
 
 Cómo se trabaja con los agentes y el repositorio.
 
@@ -105,7 +105,7 @@ Cómo se trabaja con los agentes y el repositorio.
 | Selección de modelo (asistente de código) | 5 | Estándar vs avanzado según la tarea, modelo al redactar un plan, en la duda empezar por estándar, **y todo plan dice si es para Opus 5 o Fable 5.1** |
 | ¿Ficha o plan? | 1 | Las 3 señales que suben una ficha a plan; si no cumple ninguna, se arregla y se cierra la ficha |
 | Ubicación de planes | 1 | El plan vive en el repo dueño, no por defecto en `services` |
-| Pendientes explícitos | 3 | No cerrar con cabos sueltos sin listarlos, cierre real (Definition of Done), lo encontrado de paso va a `PENDIENTES.md` |
+| Pendientes explícitos | 4 | No cerrar con cabos sueltos sin listarlos, cierre real (Definition of Done), lo encontrado de paso va a `PENDIENTES.md`, **una ficha no se cierra sin guardián o sin el porqué** |
 | Reglas nacidas de bugs reales | 1 | Bug recurrente → regla nueva con 🐛, protegida contra eliminación (+ candidatas en observación) |
 
 ### Además
@@ -405,6 +405,8 @@ Pendiente: Actualizar los 2 consumidores para usar el token en header
 - ⭐⭐⭐ **Cuando se cierra algo, se cierra de verdad — sin cabos sueltos por menores que sean.** Una tarea/fase NO está cerrada hasta cumplir su *Definition of Done* completa: código + tests verdes (0 failed/skipped/warnings) + validación real (smoke/servicio reiniciado si aplica) + docs/planes/DEUDA actualizados + commit. No se aparcan sub-items "menores" (un filtro, un puntero de doc, un test de paridad, un TODO) para "luego": o se hacen ahora, o se listan explícitamente como pendiente abierto con su ID y motivo — nunca se dan por hechos en silencio. Si al cerrar quedan IDs en `abierto`/`en_curso` que pertenecían al alcance, no se anuncia la fase como cerrada. _(🐛 origen: cierres de fase declarados "hechos" dejando D03/D04/D06 y subtareas "menores" sin terminar, que luego se olvidan)_
 
 - ⭐⭐⭐ **Lo que se encuentra de paso se anota en `PENDIENTES.md` antes de seguir.** Si al hacer una tarea aparece algo roto, raro o a medias que no forma parte del encargo, se apunta con su **ID**, qué se verificó y qué es solo sospecha — aunque no se vaya a arreglar ahora, y aunque parezca menor. No vale dejarlo solo en un `PLAN_*.md`, en un `CLAUDE.md` ni en el mensaje de commit: ahí nadie busca trabajo pendiente. Si resulta que ya estaba anotado, mejor: se actualiza. _(🐛 origen: en una sola sesión aparecieron una fuga de adaptador en `puesta_a_punto.py:521`, un desajuste entre `CHECK_ORDER` y `CHECK_REGISTRY` que dejaba un check fuera, y cuatro tareas programadas sin script de baja; los tres quedaron escritos en documentos donde nadie los habría vuelto a leer)_
+
+- ⭐⭐⭐ **Una ficha no se cierra sin guardián, o sin escribir por qué no puede tenerlo.** Cerrar una ficha es afirmar que el problema no vuelve, y la disciplina no lo garantiza: lo garantiza un check en `scripts/audit.py`, un test por AST en `shared/tests/` o un test del servicio que **falle si el fallo reaparece** — probado rompiéndolo, como pide la regla 84. Si de verdad no puede tener guardián (necesita hardware, es una decisión de producto, es un dato externo), la ficha lo dice en su cierre con el motivo, para que nadie lo lea como un olvido. Lo que sí tiene guardián posible y se cierra sin él es una ficha a medias. _(🐛 origen: «disciplina: actualizar `.env.example`» vivió meses como buena intención en `PLAN_CIMIENTOS_PENDIENTES.md`; desde que es `check_env_example_outdated` bloqueó dos pushes en un solo día. Y el 2026-09-10 salieron dos fichas —`TESTENV-01`, `TESTENVBASE-01`— arregladas hacía cinco meses y abiertas, y una duplicada: nadie remedía lo que sólo vive en prosa)_
 
 ### Reglas nacidas de bugs reales
 
